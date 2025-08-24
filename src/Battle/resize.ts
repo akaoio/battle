@@ -10,6 +10,13 @@ export function resize(this: any, cols: number, rows: number): void {
     
     this.log('info', `Resizing terminal: ${cols}x${rows}`)
     
+    // Record resize event
+    this.replay.record({
+        type: 'resize',
+        timestamp: 0,
+        data: { cols, rows }
+    })
+    
     // Store previous size for comparison
     const previousCols = this.options.cols
     const previousRows = this.options.rows

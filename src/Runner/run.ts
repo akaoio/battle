@@ -1,5 +1,5 @@
 import { Battle } from '../Battle/index.js'
-import chalk from 'chalk'
+import { color as chalk } from '../utils/colors.js'
 
 export async function run(this: any): Promise<void> {
     console.log(chalk.blue('\nBattle Test Runner\n'))
@@ -27,9 +27,15 @@ export async function run(this: any): Promise<void> {
                 // Spawn the process
                 battle.spawn(test.command, test.args)
                 
+                // Wait for process to start
+                await battle.wait(200)
+                
                 // Handle interactions
                 if (test.interactions) {
                     for (const interaction of test.interactions) {
+                        // Give time for prompt to appear
+                        await battle.wait(100)
+                        
                         await battle.interact(async (data, output) => {
                             const clean = output.replace(/\x1b\[[0-9;]*[mGKJH]/g, '')
                             
@@ -49,7 +55,7 @@ export async function run(this: any): Promise<void> {
                 // Check expectations
                 if (test.expectations) {
                     for (const expectation of test.expectations) {
-                        battle.expect(expectation)
+                        await battle.expect(expectation)
                     }
                 }
                 

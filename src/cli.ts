@@ -8,9 +8,10 @@
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { Battle, Runner, Silent } from './index.js'
+import { Replay } from './Replay/index.js'
 import fs from 'fs'
 import path from 'path'
-import chalk from 'chalk'
+import { color as chalk } from './utils/colors.js'
 
 const argv = yargs(hideBin(process.argv))
     .command('test [file]', 'Run tests from a file or directory', (yargs) => {
@@ -32,6 +33,29 @@ const argv = yargs(hideBin(process.argv))
             .positional('command', {
                 describe: 'Command to test',
                 type: 'string'
+            })
+    })
+    .command('replay <action> [file]', 'Replay operations', (yargs) => {
+        return yargs
+            .positional('action', {
+                describe: 'Action: play, export',
+                choices: ['play', 'export'],
+                type: 'string'
+            })
+            .positional('file', {
+                describe: 'Replay file path',
+                type: 'string'
+            })
+            .option('speed', {
+                type: 'number',
+                description: 'Playback speed multiplier',
+                default: 1.0
+            })
+            .option('format', {
+                type: 'string',
+                description: 'Export format (html, json)',
+                choices: ['html', 'json'],
+                default: 'html'
             })
     })
     .option('verbose', {
@@ -102,8 +126,16 @@ async function main() {
         
         if (result.success) {
             console.log(chalk.green('Test passed'))
+            if (result.replayPath) {
+                console.log(chalk.blue(`Replay saved: ${result.replayPath}`))
+                console.log(chalk.gray(`To replay: battle replay play ${result.replayPath}`))
+            }
         } else {
             console.log(chalk.red('Test failed:'), result.error)
+            if (result.replayPath) {
+                console.log(chalk.blue(`Replay saved: ${result.replayPath}`))
+                console.log(chalk.gray(`To replay: battle replay play ${result.replayPath}`))
+            }
             process.exit(1)
         }
         
@@ -120,6 +152,52 @@ async function main() {
             console.log(chalk.red('Command failed'))
             console.log(result.stderr)
             process.exit(1)
+        }
+        
+    } else if (command === 'replay') {
+        // Handle replay commands
+        const action = argv.action as string
+        const file = argv.file as string
+        
+        if (action === 'play') {
+            if (!file) {
+                console.error(chalk.red('Replay file path required'))
+                process.exit(1)
+            }
+            
+            if (!fs.existsSync(file)) {
+                console.error(chalk.red(`Replay file not found: ${file}`))
+                process.exit(1)
+            }
+            
+            const replay = new Replay()
+            replay.load(file)
+            await replay.play({
+                speed: argv.speed,
+                verbose: argv.verbose !== false
+            })
+            
+        } else if (action === 'export') {
+            if (!file) {
+                console.error(chalk.red('Replay file path required'))
+                process.exit(1)
+            }
+            
+            if (!fs.existsSync(file)) {
+                console.error(chalk.red(`Replay file not found: ${file}`))
+                process.exit(1)
+            }
+            
+            const replay = new Replay()
+            replay.load(file)
+            
+            const format = argv.format as 'html' | 'json'
+            const output = replay.export(format)
+            
+            const outputFile = file.replace('.json', `.${format}`)
+            fs.writeFileSync(outputFile, output)
+            
+            console.log(chalk.green(`Exported to: ${outputFile}`))
         }
         
     } else {

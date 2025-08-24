@@ -15,6 +15,7 @@ import { resize } from './resize.js'
 import { sendKey } from './sendKey.js'
 import { wait } from './wait.js'
 import { getCursor } from './getCursor.js'
+import { Replay } from '../Replay/index.js'
 import type { BattleOptions, TestResult, InteractionHandler } from '../types/index.js'
 
 export class Battle {
@@ -24,6 +25,7 @@ export class Battle {
     screenshots!: string[]
     logs!: string[]
     startTime!: number
+    replay!: Replay
     
     constructor(options: BattleOptions = {}) {
         constructor.call(this, options)
@@ -41,8 +43,8 @@ export class Battle {
         return screenshot.call(this, name)
     }
     
-    expect(pattern: string | RegExp) {
-        return expect.call(this, pattern)
+    async expect(pattern: string | RegExp, timeout?: number) {
+        return expect.call(this, pattern, timeout)
     }
     
     log(level: string, message: string) {

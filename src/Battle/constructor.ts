@@ -1,3 +1,4 @@
+import { Replay } from '../Replay/index.js'
 import type { BattleOptions } from '../types/index.js'
 
 export function constructor(this: any, options: BattleOptions = {}) {
@@ -18,4 +19,10 @@ export function constructor(this: any, options: BattleOptions = {}) {
     this.screenshots = []
     this.logs = []
     this.startTime = Date.now()
+    this.replay = new Replay()
+    
+    // Initialize replay metadata
+    this.replay.data.metadata.cols = this.options.cols
+    this.replay.data.metadata.rows = this.options.rows
+    this.replay.data.metadata.env = { ...this.options.env }
 }

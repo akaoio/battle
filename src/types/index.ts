@@ -16,6 +16,7 @@ export interface TestResult {
     screenshots: string[]
     logs: string[]
     error: string | null
+    replayPath?: string
 }
 
 export type InteractionHandler = (
@@ -42,4 +43,24 @@ export interface TestSuite {
     afterAll?: () => Promise<void> | void
     beforeEach?: () => Promise<void> | void
     afterEach?: () => Promise<void> | void
+}
+
+export interface ReplayEvent {
+    type: 'spawn' | 'output' | 'input' | 'resize' | 'key' | 'screenshot' | 'expect' | 'exit'
+    timestamp: number
+    data: any
+}
+
+export interface ReplayData {
+    version: string
+    timestamp: string
+    duration: number
+    events: ReplayEvent[]
+    metadata: {
+        cols: number
+        rows: number
+        command: string
+        args: string[]
+        env: Record<string, string>
+    }
 }

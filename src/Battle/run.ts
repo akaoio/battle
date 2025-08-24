@@ -1,3 +1,4 @@
+import path from 'path'
 import type { TestResult } from '../types/index.js'
 
 export async function run(this: any, testFn: (battle: any) => Promise<void>): Promise<TestResult> {
@@ -20,13 +21,25 @@ export async function run(this: any, testFn: (battle: any) => Promise<void>): Pr
     
     const duration = Date.now() - startTime
     
+    // Save replay
+    let replayPath: string | undefined
+    try {
+        const replayFilename = `replay-${Date.now()}.json`
+        replayPath = path.join(this.options.logDir || './logs', replayFilename)
+        this.replay.save(replayPath)
+        this.log('info', `Replay saved: ${replayPath}`)
+    } catch (e) {
+        this.log('error', `Failed to save replay: ${e}`)
+    }
+    
     const result: TestResult = {
         success,
         duration,
         output: this.output,
         screenshots: this.screenshots,
         logs: this.logs,
-        error: error?.message || null
+        error: error?.message || null,
+        replayPath
     }
     
     return result

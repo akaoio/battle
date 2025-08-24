@@ -24,6 +24,13 @@ export function screenshot(this: any, name?: string): string {
     const htmlPath = filepath.replace('.txt', '.html')
     fs.writeFileSync(htmlPath, screen.html)
     
+    // Record screenshot event
+    this.replay.record({
+        type: 'screenshot',
+        timestamp: 0,
+        data: { name: filename, path: filepath }
+    })
+    
     this.screenshots.push(filepath)
     this.log('info', `Screenshot saved: ${filepath}`)
     

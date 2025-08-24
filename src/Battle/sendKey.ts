@@ -65,6 +65,20 @@ export function sendKey(this: any, key: string): void {
     
     const sequence = keyMap[key.toLowerCase()] || key
     
+    // Record key event
+    this.replay.record({
+        type: 'key',
+        timestamp: 0,
+        data: key
+    })
+    
+    // Record as input too for accurate stdin recording
+    this.replay.record({
+        type: 'input',
+        timestamp: 0,
+        data: sequence
+    })
+    
     this.log('input', `Sending key: ${key} (${sequence.replace(/\x1b/g, '^[').replace(/\r/g, '\\r').replace(/\n/g, '\\n')})`)
     this.pty.write(sequence)
 }

@@ -1,228 +1,344 @@
-# Battle - Universal Terminal Testing Framework
+# @akaoio/battle
 
-Test any terminal application with real PTY emulation, screenshots, and comprehensive logging.
+> Universal terminal application testing framework with real PTY emulation and screenshots
 
-## Features
+[![Version](https://img.shields.io/npm/v/@akaoio/battle.svg)](https://npmjs.org/package/@akaoio/battle)
+[![License](https://img.shields.io/npm/l/@akaoio/battle.svg)](https://github.com/akaoio/battle/blob/main/LICENSE)
+[![Node](https://img.shields.io/node/v/@akaoio/battle.svg)](https://nodejs.org)
 
-- **Real PTY Emulation**: Test interactive terminal applications as they really behave
-- **Dynamic Viewport Resizing**: Test how apps handle terminal size changes in real-time
-- **Universal**: Test any terminal app in any language
-- **Screenshots**: Capture terminal state at any point with ANSI color preservation
-- **Key Sequences**: Send special keys (arrows, function keys, ctrl combinations)
-- **Cursor Tracking**: Get cursor position for precise testing
-- **Exhaustive Logging**: Every interaction, output, and state change is logged
-- **Silent Mode**: Test non-interactive system commands
-- **Self-Testing**: The framework tests itself (the chicken and the egg)
+## 🎮 Features
 
-## Installation
+- 🎯 **Real PTY Testing** - Test actual terminal behavior, not fake I/O
+- 🎬 **StarCraft-Style Replays** - Record and replay terminal sessions
+- 🎮 **YouTube-Style Controls** - Full media player for replay playback
+- 🖼️ **Screenshots** - Capture terminal state in multiple formats
+- ⌨️ **Keyboard Simulation** - Send any key combination
+- 📐 **Viewport Control** - Resize terminal dimensions
+- 🔍 **Pattern Matching** - Regex and string expectations
+- 🏃 **Test Runner** - Built-in test suite execution
+- 🔇 **Silent Mode** - For non-interactive commands
+- 🌍 **Universal** - Test any terminal app in any language
+
+## 📦 Installation
 
 ```bash
+# NPM
 npm install @akaoio/battle
+
+# Yarn
+yarn add @akaoio/battle
+
+# PNPM
+pnpm add @akaoio/battle
+
+# Bun
+bun add @akaoio/battle
 ```
 
-## Quick Start
+## 🚀 Quick Start
+
+### As a Module
 
 ```typescript
 import { Battle } from '@akaoio/battle'
 
-const battle = new Battle()
+const battle = new Battle({
+    verbose: false,
+    timeout: 10000
+})
 
-await battle.run(async (b) => {
-    b.spawn('npm', ['--version'])
-    b.expect(/\d+\.\d+\.\d+/)
-    b.screenshot('npm-version')
+const result = await battle.run(async (b) => {
+    // Spawn a terminal application
+    b.spawn('echo', ['Hello, Battle!'])
+    
+    // Wait for output
+    await b.expect('Hello, Battle!')
+    
+    // Send keyboard input
+    b.sendKey('enter')
+    
+    // Take a screenshot
+    b.screenshot('test-complete')
+})
+
+console.log('Test result:', result.success)
+console.log('Replay saved:', result.replayPath)
+```
+
+### As a CLI Tool
+
+```bash
+# Install globally
+npm install -g @akaoio/battle
+
+# Run a simple test
+battle run "echo 'Hello, World!'"
+
+# Run with expectations
+battle test "ls -la" --expect "package.json"
+
+# Replay a recorded session
+battle replay play ./logs/replay-*.json
+
+# Export replay to HTML
+battle replay export ./logs/replay-*.json --format html
+```
+
+## 🎬 StarCraft-Style Replay System
+
+Battle features a comprehensive replay system that records terminal sessions like StarCraft game replays:
+
+### Recording
+
+Every Battle test automatically records a replay file containing:
+- All terminal input/output events
+- Precise timestamps for perfect playback
+- Terminal dimensions and environment
+- Key presses and control sequences
+
+### Terminal Player
+
+```bash
+battle replay play recording.json
+```
+
+**YouTube-Style Controls:**
+- **Space** - Play/Pause
+- **S** - Stop
+- **R** - Restart  
+- **E** - Jump to End
+- **+/-** - Speed Up/Down (0.1× to 50×)
+- **0-4** - Speed Presets
+- **←→** - Skip Forward/Backward
+- **Q/ESC** - Quit
+
+### HTML Export
+
+```bash
+battle replay export recording.json --format html
+```
+
+Generates an interactive HTML player with:
+- Full media controls
+- Speed control (0× to unlimited)
+- Progress bar with scrubbing
+- Event timeline visualization
+- Keyboard shortcuts
+
+## 🧪 Testing Philosophy
+
+### Real PTY Testing
+
+Battle uses actual PTY (pseudo-terminal) emulation, not fake stdin/stdout pipes. This reveals real bugs that pipe-based testing misses:
+
+- Buffering issues
+- ANSI escape sequences
+- Terminal-specific behavior
+- TTY detection
+- Timing problems
+
+### Self-Testing Framework
+
+Battle tests itself using its own framework - the ultimate validation:
+
+```bash
+npm test          # Run self-test suite
+npm test:replay   # Test replay system
+npm test:all      # Run all tests
+```
+
+## 📚 Core Components
+
+### Battle Class
+
+Main testing interface with PTY control:
+
+```typescript
+const battle = new Battle({
+    cols: 80,           // Terminal width
+    rows: 24,           // Terminal height
+    cwd: process.cwd(), // Working directory
+    env: process.env,   // Environment variables
+    timeout: 30000,     // Test timeout
+    verbose: false,     // Show output
+    logDir: './logs',   // Log directory
+    screenshotDir: './screenshots'
 })
 ```
 
-## Testing Interactive Applications
+### Methods
+
+- **spawn(command, args)** - Start a terminal application
+- **sendKey(key)** - Send keyboard input
+- **expect(pattern, timeout)** - Wait for output pattern
+- **screenshot(name)** - Capture terminal state
+- **resize(cols, rows)** - Resize terminal
+- **wait(ms)** - Wait for duration
+- **getCursor()** - Get cursor position
+
+### Runner Class
+
+Test suite execution:
 
 ```typescript
-import { Battle } from '@akaoio/battle'
+const runner = new Runner()
 
-const battle = new Battle({ verbose: true })
-
-await battle.run(async (b) => {
-    b.spawn('node', ['install.js'])
-    
-    await b.interact(async (data, output) => {
-        if (output.includes('Enter name:')) {
-            return 'My App\n'
-        }
-        if (output.includes('Enter port:')) {
-            return '3000\n'
-        }
-        if (output.includes('Continue?')) {
-            return 'y\n'
-        }
-        return null // End interaction
-    })
-    
-    b.expect('Installation complete')
-    b.screenshot('install-success')
+runner.test('Echo test', {
+    command: 'echo',
+    args: ['Hello'],
+    expectations: ['Hello']
 })
+
+await runner.run()
 ```
 
-## Testing Viewport Resizing
+### Silent Class
+
+For non-interactive system commands:
 
 ```typescript
-import { Battle } from '@akaoio/battle'
+const silent = new Silent()
 
-const battle = new Battle({ cols: 80, rows: 24 })
+const result = silent.exec('ls -la')
+const isRunning = silent.isRunning('node')
+const portOpen = silent.isPortOpen(3000)
+```
 
+### Replay Class
+
+Session recording and playback:
+
+```typescript
+const replay = new Replay()
+
+// Load a recording
+replay.load('recording.json')
+
+// Play in terminal
+await replay.play({ speed: 2.0 })
+
+// Export to HTML
+const html = replay.export('html')
+```
+
+## 🏗️ Architecture
+
+Battle follows the **Class = Directory + Method-per-file** pattern:
+
+```
+Battle/
+├── index.ts        # Class definition
+├── constructor.ts  # Constructor logic
+├── spawn.ts        # spawn() method
+├── expect.ts       # expect() method
+├── sendKey.ts      # sendKey() method
+├── screenshot.ts   # screenshot() method
+├── resize.ts       # resize() method
+└── run.ts          # run() method
+```
+
+## 🔧 Development
+
+### Building
+
+```bash
+npm run build        # Build all formats
+npm run build:watch  # Watch mode
+npm run typecheck    # Type checking
+```
+
+### Testing
+
+```bash
+npm test            # Main test suite
+npm test:replay     # Replay tests
+npm test:all        # All tests
+npm test:quick      # Quick tests
+```
+
+### Documentation
+
+```bash
+npm run doc         # Generate docs
+bun doc             # Generate with Bun
+```
+
+## 📖 Examples
+
+### Testing Interactive CLI
+
+```typescript
 await battle.run(async (b) => {
-    // Start a TUI application
-    b.spawn('vim', ['file.txt'])
-    await b.wait(1000)
+    b.spawn('npm', ['init'])
     
-    // Test different viewport sizes
-    b.resize(120, 40)  // Large terminal
-    await b.wait(500)
-    b.screenshot('vim-large')
+    await b.expect('package name:')
+    b.sendKey('my-package')
+    b.sendKey('enter')
     
-    b.resize(40, 20)   // Small terminal
-    await b.wait(500)
-    b.screenshot('vim-small')
+    await b.expect('version:')
+    b.sendKey('enter')  // Accept default
     
-    // Send key sequences
-    b.sendKey('escape')
-    b.sendKey(':q!')
+    await b.expect('Is this OK?')
+    b.sendKey('y')
     b.sendKey('enter')
 })
 ```
 
-## Testing System Commands (Silent Mode)
+### Testing TUI Applications
 
 ```typescript
-import { Silent } from '@akaoio/battle'
-
-const silent = new Silent()
-
-// Run command
-const result = silent.exec('ls -la')
-console.log(result.stdout)
-
-// Check if process is running
-const isRunning = silent.isRunning('node')
-
-// Check if port is open
-const portOpen = silent.isPortOpen(3000)
-
-// Wait for condition
-await silent.waitFor(() => silent.fileExists('./output.txt'), 5000)
+await battle.run(async (b) => {
+    b.spawn('vim', ['test.txt'])
+    
+    await b.wait(500)  // Wait for vim to start
+    
+    b.sendKey('i')  // Insert mode
+    b.sendKey('Hello, Vim!')
+    b.sendKey('escape')
+    b.sendKey(':wq')
+    b.sendKey('enter')
+    
+    await b.expect('written')
+})
 ```
 
-## Test Runner
-
-Create test suites:
+### Cross-Platform Testing
 
 ```typescript
-import { Runner } from '@akaoio/battle'
-
 const runner = new Runner()
 
-runner.suite('My App Tests', [
+runner.suite('Cross-platform tests', [
     {
-        name: 'Show help',
-        command: 'myapp',
-        args: ['--help'],
-        expectations: ['Usage:', '--version']
+        name: 'List files',
+        command: process.platform === 'win32' ? 'dir' : 'ls',
+        args: [],
+        expectations: [/\.json/]
     },
     {
-        name: 'Interactive setup',
-        command: 'myapp',
-        args: ['setup'],
-        interactions: [
-            { expect: 'Database?', respond: 'postgres\n' },
-            { expect: 'Port?', respond: '5432\n' }
-        ],
-        expectations: ['Setup complete']
+        name: 'Check Node',
+        command: 'node',
+        args: ['--version'],
+        expectations: [/v\d+\.\d+\.\d+/]
     }
 ])
 
 await runner.run()
 ```
 
-## CLI Usage
+## 🤝 Contributing
 
-```bash
-# Run test files
-battle test ./test
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details.
 
-# Test a single command
-battle run "echo hello"
+## 📄 License
 
-# Test with screenshots
-battle run "npm start" --screenshot
+MIT - See [LICENSE](LICENSE) for details.
 
-# Silent mode (non-interactive)
-battle silent "ps aux"
+## 🙏 Acknowledgments
 
-# Verbose output
-battle test --verbose
-```
+- Built with [node-pty](https://github.com/microsoft/node-pty) for real terminal emulation
+- Inspired by StarCraft's replay system
+- Self-testing philosophy from test-driven development
 
-## Screenshots
+---
 
-Battle captures terminal output in three formats:
-
-1. **Raw**: Original output with ANSI codes
-2. **Clean**: Text-only version without formatting
-3. **HTML**: Visual representation with colors
-
-Screenshots are saved to `./screenshots` by default.
-
-## Logging
-
-All interactions are logged to `./logs` with timestamps:
-
-```
-[2024-01-20T10:30:00.000Z] [INFO] Spawning: npm test
-[2024-01-20T10:30:00.100Z] [OUTPUT] > myapp@1.0.0 test
-[2024-01-20T10:30:01.000Z] [INPUT] y\n
-[2024-01-20T10:30:02.000Z] [INFO] Pattern matched: All tests passed
-```
-
-## Self-Testing
-
-Battle tests itself using its own framework:
-
-```bash
-npm test  # Runs Battle's self-test suite
-```
-
-The test suite (`test/self.test.ts`) uses Battle to test Battle, proving the framework works correctly.
-
-## API Reference
-
-### Battle Class
-
-- `spawn(command, args?)`: Start a process
-- `interact(handler)`: Handle interactive prompts
-- `expect(pattern)`: Assert output contains pattern
-- `screenshot(name?)`: Capture current terminal state
-- `resize(cols, rows)`: Dynamically resize terminal viewport
-- `sendKey(key)`: Send special key sequences (arrows, F-keys, ctrl, etc.)
-- `wait(ms)`: Wait for specified milliseconds
-- `getCursor()`: Get current cursor position
-- `log(level, message)`: Add to log
-- `cleanup()`: Kill process and cleanup
-
-### Silent Class
-
-- `exec(command, options?)`: Run command and capture output
-- `isRunning(pattern)`: Check if process is running
-- `isPortOpen(port, host?)`: Check if port is open
-- `fileExists(path)`: Check if file exists
-- `readFile(path)`: Read file content
-- `waitFor(condition, timeout?, interval?)`: Wait for condition
-
-### Runner Class
-
-- `suite(name, tests)`: Add test suite
-- `test(name, testCase)`: Add single test
-- `run()`: Execute all tests
-- `report()`: Generate test report
-
-## License
-
-MIT
+Built with ❤️ by [AKAO.IO](https://akao.io)

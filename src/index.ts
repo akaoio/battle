@@ -6,6 +6,7 @@
 export { Battle } from './Battle/index.js'
 export { Runner } from './Runner/index.js'
 export { Silent } from './Silent/index.js'
+export { Replay } from './Replay/index.js'
 export * from './types/index.js'
 
 // Quick test function
