@@ -26,6 +26,7 @@
     "build:watch": "akao-build --watch",
     "dev": "tsx src/cli.ts",
     "test": "npm run build && tsx test/index.test.ts",
+    "test:self": "npm run build && node test/battle-self-test.js",
     "test:battle": "npm run build && tsx test/Battle/index.test.ts",
     "test:replay": "npm run build && tsx test/Replay/index.test.ts",
     "test:runner": "npm run build && tsx test/Runner/index.test.ts",
@@ -54,6 +55,7 @@
   "dependencies": {
     "@akaoio/ruspty": "^3.5.5",
     "chalk": "^4.1.2",
+    "node-pty": "^1.0.0",
     "terminal-kit": "^3.0.0",
     "yargs": "^17.7.2"
   },

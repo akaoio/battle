@@ -1,4 +1,6 @@
 export interface BattleOptions {
+    command?: string
+    args?: string[]
     cols?: number
     rows?: number
     cwd?: string

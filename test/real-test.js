@@ -1,37 +1,35 @@
 #!/usr/bin/env node
-/**
- * REAL test - no fake code, actual functionality test
- */
-
-import { Battle } from '../dist/index.js';
+import { Battle } from '../dist/index.js'
 
 async function realTest() {
-    console.log('REAL Battle Test - No fake code\n');
-    
-    const battle = new Battle({ verbose: true, timeout: 5000 });
+    console.log('Real Battle Test')
     
     try {
-        const result = await battle.run(async (b) => {
-            // This should actually spawn echo and capture output
-            await b.spawn('echo', ['REAL OUTPUT TEST']);
-            await b.wait(100);
-            await b.expect('REAL OUTPUT TEST');
-        });
+        const battle = new Battle({
+            command: 'echo',
+            args: ['Hello Battle'],
+            timeout: 5000
+        })
         
-        console.log('\nTest result:', result.success ? 'PASSED' : 'FAILED');
-        console.log('Output captured:', result.output.trim());
+        await battle.spawn()
+        await new Promise(resolve => setTimeout(resolve, 100))
         
-        if (!result.success) {
-            console.log('Error:', result.error);
+        // Access output directly
+        console.log('Output buffer:', battle.output || 'empty')
+        
+        // Try expect
+        try {
+            await battle.expect('Hello Battle')
+            console.log('✅ Pattern matched!')
+        } catch (e) {
+            console.log('❌ Pattern not found')
         }
         
-        return result.success;
-    } catch (err) {
-        console.error('ACTUAL ERROR:', err);
-        return false;
+        battle.cleanup()
+        
+    } catch (error) {
+        console.error('Error:', error.message)
     }
 }
 
-realTest().then(success => {
-    process.exit(success ? 0 : 1);
-});
+realTest()

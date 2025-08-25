@@ -1,7 +1,15 @@
 import { createPTY } from '../PTY/index.js'
 
-export async function spawn(this: any, command: string, args: string[] = []): Promise<void> {
-    this.log('info', `Spawning: ${command} ${args.join(' ')}`)
+export async function spawn(this: any, command?: string, args?: string[]): Promise<void> {
+    // Use constructor values if not provided
+    const cmd = command || this.command
+    const cmdArgs = args || this.args || []
+    
+    if (!cmd) {
+        throw new Error('No command specified. Provide command in constructor or spawn() call.')
+    }
+    
+    this.log('info', `Spawning: ${cmd} ${cmdArgs.join(' ')}`)
     
     // Kill previous PTY if exists
     if (this.pty && !this.pty.killed) {
@@ -16,15 +24,15 @@ export async function spawn(this: any, command: string, args: string[] = []): Pr
     this.replay.record({
         type: 'spawn',
         timestamp: 0, // Will be set by record method
-        data: { command, args }
+        data: { command: cmd, args: cmdArgs }
     })
     
     // Update replay metadata
-    this.replay.data.metadata.command = command
-    this.replay.data.metadata.args = args
+    this.replay.data.metadata.command = cmd
+    this.replay.data.metadata.args = cmdArgs
     
     // Use compatibility layer to create PTY
-    this.pty = await createPTY(command, args, {
+    this.pty = await createPTY(cmd, cmdArgs, {
         name: 'xterm-256color',
         cols: this.options.cols,
         rows: this.options.rows,

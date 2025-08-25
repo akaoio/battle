@@ -9,8 +9,7 @@
 ## 🎮 Features
 
 - 🎯 **Real PTY Testing** - Test actual terminal behavior, not fake I/O
-- 🎬 **StarCraft-Style Replays** - Record and replay terminal sessions
-- 🎮 **YouTube-Style Controls** - Full media player for replay playback
+- 🎬 **JSON Replays** - Record terminal sessions as JSON files
 - 🖼️ **Screenshots** - Capture terminal state in multiple formats
 - ⌨️ **Keyboard Simulation** - Send any key combination
 - 📐 **Viewport Control** - Resize terminal dimensions
@@ -84,9 +83,9 @@ battle replay play ./logs/replay-*.json
 battle replay export ./logs/replay-*.json --format html
 ```
 
-## 🎬 StarCraft-Style Replay System
+## 🎬 Replay System
 
-Battle features a comprehensive replay system that records terminal sessions like StarCraft game replays:
+Battle features a replay system that records terminal sessions as JSON files:
 
 ### Recording
 
@@ -336,7 +335,7 @@ MIT - See [LICENSE](LICENSE) for details.
 ## 🙏 Acknowledgments
 
 - Built with [node-pty](https://github.com/microsoft/node-pty) for real terminal emulation
-- Inspired by StarCraft's replay system
+- JSON-based replay format
 - Self-testing philosophy from test-driven development
 
 ---

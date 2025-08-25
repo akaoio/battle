@@ -2,6 +2,10 @@ import { Replay } from '../Replay/index.js'
 import type { BattleOptions } from '../types/index.js'
 
 export function constructor(this: any, options: BattleOptions = {}) {
+    // Store command and args if provided in constructor
+    this.command = options.command
+    this.args = options.args || []
+    
     this.options = {
         cols: 80,
         rows: 24,

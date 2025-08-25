@@ -20,14 +20,6 @@ export async function play(this: any, options: any = {}): Promise<void> {
     // Initialize replay output buffer (no PTY needed for replay)
     let replayOutput = ''
     
-    // Mock PTY object for compatibility (not actually used)
-    const replayPty = {
-        write: (data: string) => { /* no-op */ },
-        resize: (cols: number, rows: number) => { /* no-op */ },
-        kill: () => { /* no-op */ },
-        killed: false
-    }
-    
     // Clear screen and show initial UI
     console.clear()
     showHeader(replayData, totalDuration, totalEvents)

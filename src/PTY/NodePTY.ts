@@ -13,24 +13,12 @@ export class NodePTY implements IPTY {
         // Load node-pty dynamically
         let nodePty: any
         
-        // Try different loading methods for compatibility
-        if (typeof require !== 'undefined') {
-            // CommonJS environment
-            try {
-                nodePty = require('node-pty')
-            } catch (err) {
-                throw new Error('node-pty is not installed. Run: npm install node-pty')
-            }
-        } else if (typeof import.meta !== 'undefined' && import.meta.url) {
-            // ESM environment
+        try {
+            // For ESM environment, use createRequire
             const requireFunc = createRequire(import.meta.url)
-            try {
-                nodePty = requireFunc('node-pty')
-            } catch (err) {
-                throw new Error('node-pty is not installed. Run: npm install node-pty')
-            }
-        } else {
-            throw new Error('Unable to load node-pty in this environment')
+            nodePty = requireFunc('node-pty')
+        } catch (err: any) {
+            throw new Error(`Failed to load node-pty: ${err.message}. Ensure node-pty is installed: npm install node-pty`)
         }
         
         this.pty = nodePty.spawn(command, args, {

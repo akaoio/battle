@@ -2,15 +2,15 @@
 
 ## Executive Summary
 
-Battle is a universal terminal application testing framework implementing real PTY (Pseudo-Terminal) emulation with StarCraft-style replay capabilities. The framework achieves deterministic testing of terminal applications through precise event recording and playback, enabling cross-session validation and visual debugging.
+Battle is a terminal application testing framework implementing real PTY (Pseudo-Terminal) emulation with JSON replay capabilities. The framework provides deterministic testing of terminal applications through event recording.
 
 ## Technical Architecture
 
 ### Core Design Principles
 
 1. **Real PTY Emulation**: Direct kernel PTY allocation via node-pty, bypassing stdio abstraction layers
-2. **Event-Driven Recording**: Microsecond-precision event capture with deterministic replay
-3. **Self-Testing Validation**: Recursive self-validation using framework's own capabilities
+2. **Event-Driven Recording**: Event capture with JSON replay files
+3. **Cross-Runtime Support**: Works with both Node.js (node-pty) and Bun (@akaoio/ruspty)
 4. **Zero Technical Debt**: Complete implementation without placeholders or TODOs
 
 ### Architectural Pattern: Class = Directory + Method-per-file
@@ -372,8 +372,8 @@ b.spawn(cmd, process.platform === 'win32' ? [] : ['-la'])
 
 ## Conclusion
 
-Battle represents a paradigm shift in terminal application testing, moving from abstracted pipe testing to authentic PTY emulation. The StarCraft-inspired replay system enables unprecedented debugging capabilities, while self-testing validation ensures framework reliability. This architecture provides the foundation for deterministic, reproducible terminal application testing across all platforms and languages.
+Battle provides real PTY emulation for terminal application testing, moving beyond abstracted pipe testing. The JSON replay system enables debugging and test reproduction. This architecture provides the foundation for deterministic terminal application testing across platforms.
 
 ---
 
-*Generated with Battle Framework v1.0.0*
+*Battle Framework v1.0.0*
