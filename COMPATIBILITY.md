@@ -1,4 +1,4 @@
-# Battle Framework - Module Format Compatibility
+# Battle Framework - Runtime & Module Compatibility
 
 ## ✅ Full Compatibility Matrix
 
@@ -124,13 +124,35 @@ Battle includes comprehensive TypeScript definitions:
 
 ## Runtime Compatibility
 
-Battle works with various JavaScript runtimes:
+Battle v2.0+ works with multiple JavaScript runtimes:
 
-- ✅ **Node.js** - Full support with all module formats
-- ✅ **tsx** - Direct TypeScript execution
+- ✅ **Node.js** - Full support with real PTY via node-pty
+- ✅ **Bun** - Full support with simulated PTY (v2.0+)
+- ✅ **tsx** - Direct TypeScript execution (Node.js)
 - ✅ **ts-node** - TypeScript execution with CommonJS
-- ⚠️ **Bun** - Partial support (PTY implementation differences)
 - ⚠️ **Deno** - Not tested (different module system)
+
+### 🚀 NEW: Bun Support (v2.0+)
+
+Battle now includes automatic runtime detection and uses the appropriate PTY implementation:
+
+```javascript
+// Works in both Node.js and Bun!
+const battle = new Battle()
+await battle.spawn('echo', ['Hello from any runtime!'])
+```
+
+#### Bun-Specific Features:
+- **Automatic Detection**: Battle detects Bun runtime automatically
+- **No node-pty Required**: Uses Bun.spawn() internally
+- **Faster Execution**: Benefits from Bun's performance
+- **Simulated PTY**: Good enough for most testing scenarios
+
+#### Bun Limitations:
+- Programs checking `isatty()` will detect non-TTY
+- Complex TUIs (vim, less) may not work properly
+- PTY signals (SIGWINCH) not supported
+- Some ANSI sequences may be limited
 
 ## Bundler Compatibility
 

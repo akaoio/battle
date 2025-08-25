@@ -1,7 +1,16 @@
-import * as pty from 'node-pty'
+import { createPTY } from '../PTY/index.js'
 
-export function spawn(this: any, command: string, args: string[] = []): void {
+export async function spawn(this: any, command: string, args: string[] = []): Promise<void> {
     this.log('info', `Spawning: ${command} ${args.join(' ')}`)
+    
+    // Kill previous PTY if exists
+    if (this.pty && !this.pty.killed) {
+        this.pty.kill()
+        await new Promise(resolve => setTimeout(resolve, 100)) // Wait for cleanup
+    }
+    
+    // Clear output buffer for new spawn
+    this.output = ''
     
     // Record spawn event
     this.replay.record({
@@ -14,7 +23,8 @@ export function spawn(this: any, command: string, args: string[] = []): void {
     this.replay.data.metadata.command = command
     this.replay.data.metadata.args = args
     
-    this.pty = pty.spawn(command, args, {
+    // Use compatibility layer to create PTY
+    this.pty = await createPTY(command, args, {
         name: 'xterm-256color',
         cols: this.options.cols,
         rows: this.options.rows,

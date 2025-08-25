@@ -83,7 +83,7 @@ async function main() {
     
     if (command === 'test') {
         // Run test files
-        const testPath = argv.file as string
+        const testPath = (argv.file || './test') as string
         
         if (fs.existsSync(testPath)) {
             const stats = fs.statSync(testPath)
@@ -96,11 +96,48 @@ async function main() {
                 for (const file of files) {
                     console.log(chalk.blue(`Running ${file}...`))
                     const fullPath = path.join(testPath, file)
-                    await import(fullPath)
+                    
+                    if (file.endsWith('.ts')) {
+                        // For TypeScript files, use tsx if available
+                        try {
+                            const { spawn } = await import('child_process')
+                            const child = spawn('tsx', [fullPath], { stdio: 'inherit' })
+                            await new Promise((resolve, reject) => {
+                                child.on('close', (code) => {
+                                    if (code === 0) resolve(void 0)
+                                    else reject(new Error(`tsx exited with code ${code}`))
+                                })
+                                child.on('error', reject)
+                            })
+                        } catch {
+                            console.error(chalk.red('TypeScript files require tsx to be installed: npm install -g tsx'))
+                            process.exit(1)
+                        }
+                    } else {
+                        await import(fullPath)
+                    }
                 }
             } else {
                 // Run single test file
-                await import(path.resolve(testPath))
+                if (testPath.endsWith('.ts')) {
+                    // For TypeScript files, use tsx if available
+                    try {
+                        const { spawn } = await import('child_process')
+                        const child = spawn('tsx', [testPath], { stdio: 'inherit' })
+                        await new Promise((resolve, reject) => {
+                            child.on('close', (code) => {
+                                if (code === 0) resolve(void 0)
+                                else reject(new Error(`tsx exited with code ${code}`))
+                            })
+                            child.on('error', reject)
+                        })
+                    } catch {
+                        console.error(chalk.red('TypeScript files require tsx to be installed: npm install -g tsx'))
+                        process.exit(1)
+                    }
+                } else {
+                    await import(path.resolve(testPath))
+                }
             }
         } else {
             console.error(chalk.red(`Test file not found: ${testPath}`))

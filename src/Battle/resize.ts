@@ -5,7 +5,11 @@
 
 export function resize(this: any, cols: number, rows: number): void {
     if (!this.pty) {
-        throw new Error('No PTY process to resize')
+        // If no PTY yet, just update the options for when spawn is called
+        this.options.cols = cols
+        this.options.rows = rows
+        this.log('info', `Terminal size set to: ${cols}x${rows} (will apply on spawn)`)
+        return
     }
     
     this.log('info', `Resizing terminal: ${cols}x${rows}`)

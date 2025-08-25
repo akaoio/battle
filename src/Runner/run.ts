@@ -1,7 +1,7 @@
 import { Battle } from '../Battle/index.js'
 import { color as chalk } from '../utils/colors.js'
 
-export async function run(this: any): Promise<void> {
+export async function run(this: any): Promise<{ total: number; passed: number; failed: number }> {
     console.log(chalk.blue('\nBattle Test Runner\n'))
     
     let totalTests = 0
@@ -25,7 +25,7 @@ export async function run(this: any): Promise<void> {
             
             try {
                 // Spawn the process
-                battle.spawn(test.command, test.args)
+                await battle.spawn(test.command, test.args)
                 
                 // Wait for process to start
                 await battle.wait(200)
@@ -88,7 +88,9 @@ export async function run(this: any): Promise<void> {
         console.log(chalk.red(`  Failed: ${failedTests}`))
     }
     
-    if (failedTests > 0) {
-        process.exit(1)
+    return {
+        total: totalTests,
+        passed: passedTests,
+        failed: failedTests
     }
 }

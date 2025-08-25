@@ -293,6 +293,7 @@ RUN battle test /tests/*.js --timeout 60000
 2. **macOS**: Some ANSI sequences differ from Linux
 3. **Docker**: PTY allocation requires --tty flag
 4. **SSH**: Remote PTY may have different capabilities
+5. **Bun on ARM64**: @akaoio/ruspty includes prebuilt ARM64 binaries
 
 ### Technical Boundaries
 

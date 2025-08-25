@@ -14,6 +14,7 @@ import { run } from './run.js'
 import { resize } from './resize.js'
 import { sendKey } from './sendKey.js'
 import { wait } from './wait.js'
+import { write } from './write.js'
 import { getCursor } from './getCursor.js'
 import { Replay } from '../Replay/index.js'
 import type { BattleOptions, TestResult, InteractionHandler } from '../types/index.js'
@@ -31,7 +32,7 @@ export class Battle {
         constructor.call(this, options)
     }
     
-    spawn(command: string, args?: string[]) {
+    async spawn(command: string, args?: string[]) {
         return spawn.call(this, command, args)
     }
     
@@ -65,6 +66,10 @@ export class Battle {
     
     sendKey(key: string) {
         return sendKey.call(this, key)
+    }
+    
+    write(data: string) {
+        return write.call(this, data)
     }
     
     wait(ms: number) {

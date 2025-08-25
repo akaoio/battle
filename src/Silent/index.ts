@@ -53,9 +53,18 @@ export class Silent {
      */
     isRunning(pattern: string): boolean {
         try {
-            const result = execSync(`pgrep -f "${pattern}"`, {
-                encoding: 'utf8'
+            // Use ps with grep to check for running processes
+            // The grep -v grep excludes the grep process itself
+            const command = process.platform === 'win32'
+                ? `tasklist | findstr /i "${pattern}"`
+                : `ps aux | grep -v grep | grep "${pattern}"`;
+            
+            const result = execSync(command, {
+                encoding: 'utf8',
+                stdio: 'pipe'
             })
+            
+            // Check if we got any real results
             return result.trim().length > 0
         } catch {
             return false
@@ -67,9 +76,26 @@ export class Silent {
      */
     isPortOpen(port: number, host = 'localhost'): boolean {
         try {
-            const result = execSync(`nc -z ${host} ${port}`, {
-                encoding: 'utf8'
-            })
+            // First check if nc is available
+            try {
+                execSync('which nc', { encoding: 'utf8', stdio: 'pipe' })
+                // If nc exists, use it
+                execSync(`nc -z ${host} ${port} 2>/dev/null`, {
+                    encoding: 'utf8',
+                    stdio: 'pipe'
+                })
+                return true
+            } catch {
+                // nc not available or port closed, try alternative
+            }
+            
+            // Fallback: try using Node.js child_process with timeout
+            // This is less reliable but works when nc is not available
+            const testCmd = process.platform === 'win32' 
+                ? `powershell -Command "Test-NetConnection -ComputerName ${host} -Port ${port} -InformationLevel Quiet"`
+                : `timeout 1 bash -c "echo > /dev/tcp/${host}/${port}" 2>/dev/null`
+            
+            execSync(testCmd, { encoding: 'utf8', stdio: 'pipe' })
             return true
         } catch {
             return false

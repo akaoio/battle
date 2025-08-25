@@ -1,4 +1,3 @@
-import * as pty from 'node-pty'
 import { color as chalk } from '../utils/colors.js'
 import { PlaybackEngine, formatTime, getEventDescription } from './PlaybackEngine.js'
 
@@ -18,21 +17,16 @@ export async function play(this: any, options: any = {}): Promise<void> {
         onProgress: (progress, state) => updateStatusLine(state)
     })
     
-    // Create a PTY for replay visualization
-    const replayPty = pty.spawn('sh', [], {
-        name: 'xterm-256color',
-        cols: replayData.metadata.cols,
-        rows: replayData.metadata.rows,
-        env: {
-            TERM: 'xterm-256color',
-            FORCE_COLOR: '1'
-        }
-    })
-    
+    // Initialize replay output buffer (no PTY needed for replay)
     let replayOutput = ''
-    replayPty.onData((data: string) => {
-        replayOutput += data
-    })
+    
+    // Mock PTY object for compatibility (not actually used)
+    const replayPty = {
+        write: (data: string) => { /* no-op */ },
+        resize: (cols: number, rows: number) => { /* no-op */ },
+        kill: () => { /* no-op */ },
+        killed: false
+    }
     
     // Clear screen and show initial UI
     console.clear()
@@ -138,11 +132,17 @@ export async function play(this: any, options: any = {}): Promise<void> {
                 break
                 
             case 'input':
-                replayPty.write(event.data)
+                // Just track input in the output buffer for replay
+                replayOutput += event.data
                 break
                 
             case 'resize':
-                replayPty.resize(event.data.cols, event.data.rows)
+                // Update terminal size display
+                process.stdout.write('\u001b[s')
+                process.stdout.write('\u001b[12;1H')
+                process.stdout.write('\u001b[K')
+                process.stdout.write(`📐 Terminal resized to ${event.data.cols}x${event.data.rows}`)
+                process.stdout.write('\u001b[u')
                 break
                 
             case 'key':
@@ -189,7 +189,7 @@ export async function play(this: any, options: any = {}): Promise<void> {
     
     function cleanup() {
         engine.destroy()
-        replayPty.kill()
+        // No PTY to kill
         
         if (process.stdin.isTTY) {
             process.stdin.setRawMode(false)

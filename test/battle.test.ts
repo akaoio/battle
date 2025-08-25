@@ -89,7 +89,7 @@ async function testBattleResize() {
         const battle = new Battle({ cols: 80, rows: 24, verbose: false })
         const result = await battle.run(async (b) => {
             // Use Battle to test Battle's resize functionality
-            b.spawn('bash', ['-c', 'echo "Initial size" && sleep 1'])
+            await b.spawn('bash', ['-c', 'echo "Initial size" && sleep 1'])
             
             // Resize and verify it doesn't crash
             b.resize(120, 40)
