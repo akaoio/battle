@@ -17,9 +17,7 @@ export async function test(
     expectations?: Array<string | RegExp>
 ) {
     const { Battle } = await import('./Battle/index.js')
-    const battle = new Battle({ verbose: true })
-    
-    console.log(`\nTesting: ${name}`)
+    const battle = new Battle({ verbose: false })
     
     const result = await battle.run(async (b) => {
         b.spawn(command)
