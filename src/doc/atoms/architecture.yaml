@@ -1,0 +1,70 @@
+philosophy:
+  pty_vs_pipes:
+    title: "Why PTY Testing Matters"
+    problem: "Traditional testing uses fake stdin/stdout pipes that miss critical bugs"
+    solution: "Battle uses real pseudo-terminals to catch TTY-dependent behavior"
+    evidence:
+      - "isatty() detection: pipes return false, PTY returns true"  
+      - "ANSI color codes: stripped in pipes, preserved in PTY"
+      - "Signal handling: limited in pipes, full propagation in PTY"
+      - "Buffer behavior: line-buffered vs raw character streams"
+
+  replay_system:
+    title: "StarCraft-Inspired Replay Architecture"
+    concept: "Every terminal session is recorded with microsecond precision"
+    benefits:
+      - "Debug failed tests across different sessions"
+      - "Visual replay with HTML export and controls"
+      - "Performance analysis with event timing"
+      - "Cross-platform test validation"
+
+class_structure:
+  pattern: "Class = Directory + Method-per-file (AKAO Standard)"
+  layout: |
+    Battle/
+    ├── index.ts        # Class definition with delegation
+    ├── constructor.ts  # Initialization logic
+    ├── spawn.ts        # Process spawning with PTY allocation
+    ├── expect.ts       # Pattern matching with timeout control
+    ├── sendKey.ts      # Keyboard input simulation  
+    ├── screenshot.ts   # Terminal state capture
+    ├── run.ts          # Test execution orchestration
+    └── cleanup.ts      # Resource deallocation
+
+  rationale: "Method isolation enables independent testing, hot-reloading, and atomic refactoring while maintaining class cohesion"
+
+performance:
+  overhead_comparison:
+    - operation: "Process spawn"
+      pipe_testing: "~5ms"
+      pty_testing: "~15ms"  
+      overhead: "3×"
+      worth_it: "YES - catches TTY bugs"
+    - operation: "Character I/O"
+      pipe_testing: "<1μs"
+      pty_testing: "~10μs"
+      overhead: "10×"
+      worth_it: "YES - real buffering"
+    - operation: "Pattern match"
+      pipe_testing: "~1ms"
+      pty_testing: "~5ms"
+      overhead: "5×"
+      worth_it: "YES - ANSI sequences"
+
+  optimization_strategies:
+    - "Event batching: Coalesce rapid output events"
+    - "Lazy screenshot: Generate only on failure"
+    - "Replay compression: Store events as binary format"
+    - "Pattern caching: Compile regex once per test"
+
+security:
+  pty_security:
+    - "Process isolation: Each test spawns isolated PTY"
+    - "Signal containment: Signals don't propagate to parent"
+    - "Resource limits: Automatic cleanup on timeout"
+    - "Environment sanitization: Controlled env variable passing"
+  
+  replay_security:
+    - "No credential storage: Environment variables sanitized"
+    - "Path anonymization: Option to obscure system paths"
+    - "Read-only playback: Replay cannot execute commands"

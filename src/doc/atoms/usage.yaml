@@ -1,0 +1,77 @@
+installation:
+  npm: "npm install --save-dev @akaoio/battle"
+  yarn: "yarn add --dev @akaoio/battle"
+  bun: "bun add --dev @akaoio/battle"
+
+basic_usage: |
+  import { Battle } from "@akaoio/battle"
+  
+  const battle = new Battle({
+    command: 'npm',
+    args: ['install'],
+    timeout: 30000
+  })
+  
+  await battle.spawn()
+  await battle.expect('packages installed')
+  battle.cleanup()
+
+advanced_usage: |
+  const battle = new Battle()
+  
+  const result = await battle.run(async (b) => {
+    b.spawn('git', ['status'])
+    await b.expect('On branch')
+    
+    b.sendKey('q')  // Quit if pager
+    await b.screenshot()  // Capture state
+  })
+  
+  // Replay is automatically saved
+  console.log('Replay saved to:', result.replayPath)
+
+cli_usage: |
+  # Run a single test
+  battle run "echo hello" --expect "hello"
+  
+  # Run with timeout
+  battle run "npm install" --timeout 60000
+  
+  # Watch mode
+  battle watch "./tests/*.battle.js"
+  
+  # Replay a session
+  battle replay ./logs/session-123.json
+  
+  # Export to HTML
+  battle export ./logs/session-123.json --format html
+
+testing_patterns:
+  interactive_apps: |
+    // Test interactive CLI apps
+    const battle = new Battle()
+    await battle.run(async (b) => {
+      b.spawn('npx', ['create-react-app', 'test-app'])
+      await b.expect('What would you like to name')
+      b.type('my-app')
+      b.sendKey('enter')
+      await b.expect('Success! Created my-app')
+    })
+  
+  error_handling: |
+    // Test error conditions
+    const battle = new Battle()
+    await battle.run(async (b) => {
+      b.spawn('npm', ['install', 'non-existent-package'])
+      await b.expect('ERR!')  // NPM error prefix
+      // Test continues even after process exits with error
+    })
+  
+  long_running: |
+    // Test long-running processes
+    const battle = new Battle({ timeout: 120000 })
+    await battle.run(async (b) => {
+      b.spawn('npm', ['run', 'build'])
+      await b.expect('Build started')
+      await b.expect('Build complete', 60000)  // Wait up to 1 minute
+    })

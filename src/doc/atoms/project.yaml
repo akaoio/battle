@@ -1,0 +1,7 @@
+name: "@akaoio/battle"
+description: "Universal terminal application testing framework with real PTY emulation"
+version: "1.1.0"
+author: "AKAO Team"
+repository: "https://github.com/akaoio/battle"
+license: "MIT"
+tagline: "Real PTY testing with StarCraft-style replay capabilities"
