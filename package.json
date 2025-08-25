@@ -38,7 +38,7 @@
     "docs:watch": "npx @akaoio/composer watch",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
-    "prepublishOnly": "npm run build && npm run docs:build"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "test",
