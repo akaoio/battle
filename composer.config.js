@@ -1,6 +1,7 @@
 /**
- * @akaoio/battle COMPREHENSIVE documentation configuration
- * Deep integration with @akaoio/composer showcasing ALL advanced features
+ * Composer configuration for @akaoio/battle
+ * Universal terminal testing framework with real PTY support
+ * This config generates CLAUDE.md and README.md from atomic documentation
  */
 module.exports = {
   // Advanced multi-source data processing
