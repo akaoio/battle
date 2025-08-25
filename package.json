@@ -31,6 +31,8 @@
     "test:replay": "npm run build && tsx test/Replay/index.test.ts",
     "test:runner": "npm run build && tsx test/Runner/index.test.ts",
     "test:silent": "npm run build && tsx test/Silent/index.test.ts",
+    "test:edge": "npm run build && tsx test/EdgeCase/index.test.ts",
+    "test:integration": "npm run build && tsx test/Integration/index.test.ts",
     "test:quick": "tsx test/self.test.ts",
     "test:legacy": "tsx test/battle.test.ts",
     "test:cli": "node dist/cli.js test",

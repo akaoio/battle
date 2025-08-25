@@ -8,12 +8,14 @@ import { runBattleTests } from './Battle/index.test.js'
 import { runReplayTests } from './Replay/index.test.js'
 import { runRunnerTests } from './Runner/index.test.js'
 import { runSilentTests } from './Silent/index.test.js'
+import { runEdgeCaseTests } from './EdgeCase/index.test.js'
+import { runIntegrationTests } from './Integration/index.test.js'
 
 async function runAllTests() {
-    console.log('╔════════════════════════════════════════╗')
-    console.log('║   BATTLE FRAMEWORK TEST SUITE          ║')
-    console.log('║   Class = Directory Pattern            ║')
-    console.log('╚════════════════════════════════════════╝')
+    console.log('========================================')
+    console.log('   BATTLE FRAMEWORK TEST SUITE')
+    console.log('   Class = Directory Pattern')
+    console.log('========================================')
     console.log()
     
     const results = {
@@ -49,11 +51,25 @@ async function runAllTests() {
     results.passed += silentResults.passed
     results.failed += silentResults.failed
     
+    console.log()
+    
+    const edgeCaseResults = await runEdgeCaseTests()
+    results.total += edgeCaseResults.total
+    results.passed += edgeCaseResults.passed
+    results.failed += edgeCaseResults.failed
+    
+    console.log()
+    
+    const integrationResults = await runIntegrationTests()
+    results.total += integrationResults.total
+    results.passed += integrationResults.passed
+    results.failed += integrationResults.failed
+    
     // Print final summary
     console.log()
-    console.log('╔════════════════════════════════════════╗')
-    console.log('║   FINAL TEST SUMMARY                   ║')
-    console.log('╚════════════════════════════════════════╝')
+    console.log('========================================')
+    console.log('   FINAL TEST SUMMARY')
+    console.log('========================================')
     console.log(`Total Tests: ${results.total}`)
     console.log(`✅ Passed: ${results.passed}`)
     console.log(`❌ Failed: ${results.failed}`)

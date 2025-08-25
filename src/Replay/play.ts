@@ -243,8 +243,8 @@ function showControls() {
 }
 
 function createProgressBar(percent: number, width: number = 40): string {
-    const filled = Math.round((percent / 100) * width)
-    const empty = width - filled
+    const filled = Math.min(Math.max(Math.round((percent / 100) * width), 0), width)
+    const empty = Math.max(width - filled, 0)
     
     const filledBar = '█'.repeat(filled)
     const emptyBar = '░'.repeat(empty)
