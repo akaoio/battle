@@ -1,0 +1,565 @@
+name: Battle CI/CD - Universal Terminal Testing Framework
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '18'
+  BUN_VERSION: 'latest'
+
+jobs:
+  lint-and-typecheck:
+    name: Lint and TypeScript Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type checking
+        run: npx tsc --noEmit
+
+      - name: Lint Battle architecture
+        run: |
+          echo "🏗️ Validating Battle architecture patterns..."
+          
+          # Check Class = Directory pattern
+          if [ ! -d "src/Battle" ]; then
+            echo "❌ Battle class directory missing"
+            exit 1
+          fi
+          
+          # Check method files exist
+          for method in constructor spawn expect sendKey screenshot resize run cleanup; do
+            if [ ! -f "src/Battle/$method.ts" ]; then
+              echo "❌ Battle method file missing: $method.ts"
+              exit 1
+            fi
+          done
+          
+          echo "✅ Battle architecture validated"
+
+  build-test:
+    name: Build and Core Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-20.04, macos-latest]
+        runtime: ['node', 'bun']
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: matrix.runtime == 'node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Bun
+        if: matrix.runtime == 'bun'
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          if [ "${{ matrix.runtime }}" = "bun" ]; then
+            bun install
+          else
+            npm ci
+          fi
+
+      - name: Build Battle
+        run: |
+          echo "⚔️ Building Battle framework..."
+          if [ "${{ matrix.runtime }}" = "bun" ]; then
+            bun run build
+          else
+            npm run build
+          fi
+
+      - name: Verify build artifacts
+        run: |
+          # Check CLI exists
+          if [ ! -f "dist/cli.js" ]; then
+            echo "❌ CLI build artifact missing"
+            exit 1
+          fi
+          
+          # Check main exports exist
+          if [ ! -f "dist/index.js" ] && [ ! -f "dist/index.cjs" ]; then
+            echo "❌ Main export artifacts missing"
+            exit 1
+          fi
+          
+          echo "✅ Build artifacts verified"
+
+      - name: Test CLI interface
+        run: |
+          echo "🧪 Testing Battle CLI..."
+          
+          # Test help command
+          node dist/cli.js --help
+          
+          # Test version command
+          node dist/cli.js --version
+
+      - name: Run unit tests
+        run: |
+          echo "🧪 Running Battle unit tests..."
+          if [ "${{ matrix.runtime }}" = "bun" ]; then
+            bun test
+          else
+            npm test
+          fi
+
+  self-tests:
+    name: Battle Self-Testing
+    runs-on: ubuntu-latest
+    needs: build-test
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Battle
+        run: npm run build
+
+      - name: Battle tests Battle (recursive)
+        run: |
+          echo "🔄 Battle testing itself (Level 1: Battle tests command)..."
+          
+          # Test Battle can test simple commands
+          node dist/cli.js test <(echo '
+            const { Battle } = require("./dist/index.cjs");
+            
+            async function testEcho() {
+              const battle = new Battle({ name: "echo-test", timeout: 5000 });
+              return await battle.run(async (b) => {
+                b.spawn("echo", ["hello battle"]);
+                await b.expect("hello battle");
+              });
+            }
+            
+            testEcho().then(() => console.log("Self-test passed")).catch(e => { console.error(e); process.exit(1); });
+          ')
+
+      - name: Level 2 recursion test
+        run: |
+          echo "🔄 Battle tests Battle testing (Level 2: Battle tests Battle)..."
+          
+          # Create a Battle test that uses Battle to test something
+          cat > self-test-l2.js << 'EOF'
+          const { Battle } = require("./dist/index.cjs");
+          
+          async function level2Test() {
+            const battle = new Battle({ name: "level2", timeout: 15000 });
+            
+            return await battle.run(async (b) => {
+              // Battle testing Battle testing echo
+              b.spawn("node", ["dist/cli.js", "test", "-"], { 
+                input: `
+                  const { Battle } = require("./dist/index.cjs");
+                  async function test() {
+                    const b = new Battle({ name: "inner", timeout: 5000 });
+                    await b.run(async (inner) => {
+                      inner.spawn("echo", ["recursive test"]);
+                      await inner.expect("recursive test");
+                    });
+                  }
+                  test().catch(e => process.exit(1));
+                `
+              });
+              
+              await b.expect("Test completed", 10000);
+            });
+          }
+          
+          level2Test().then(() => console.log("Level 2 test passed")).catch(e => {
+            console.error("Level 2 test failed:", e);
+            process.exit(1);
+          });
+          EOF
+          
+          node self-test-l2.js
+
+  pty-validation:
+    name: PTY vs Pipe Validation
+    runs-on: ubuntu-latest
+    needs: self-tests
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Battle
+        run: npm run build
+
+      - name: Test PTY detection
+        run: |
+          echo "🖥️ Testing PTY vs Pipe detection..."
+          
+          # Create test that verifies PTY behavior
+          cat > pty-test.js << 'EOF'
+          const { Battle } = require("./dist/index.cjs");
+          
+          async function testPTY() {
+            const battle = new Battle({ name: "pty-test", timeout: 10000 });
+            
+            return await battle.run(async (b) => {
+              // Test that tty detection works in PTY
+              b.spawn("node", ["-e", "console.log(process.stdout.isTTY ? 'TTY=true' : 'TTY=false')"]);
+              await b.expect("TTY=true", 5000);
+            });
+          }
+          
+          testPTY().then(() => {
+            console.log("✅ PTY detection working correctly");
+          }).catch(e => {
+            console.error("❌ PTY detection failed:", e);
+            process.exit(1);
+          });
+          EOF
+          
+          node pty-test.js
+
+      - name: Test ANSI preservation
+        run: |
+          echo "🎨 Testing ANSI sequence preservation..."
+          
+          cat > ansi-test.js << 'EOF'
+          const { Battle } = require("./dist/index.cjs");
+          
+          async function testANSI() {
+            const battle = new Battle({ name: "ansi-test", timeout: 10000 });
+            
+            return await battle.run(async (b) => {
+              // Test colored output is preserved
+              b.spawn("node", ["-e", "console.log('\\x1b[31mRED\\x1b[0m text')"]);
+              await b.expect("RED", 5000);
+              
+              // Verify ANSI codes are in output
+              const output = b.getOutput();
+              if (!output.includes('\x1b[31m')) {
+                throw new Error("ANSI codes not preserved");
+              }
+            });
+          }
+          
+          testANSI().then(() => {
+            console.log("✅ ANSI preservation working");
+          }).catch(e => {
+            console.error("❌ ANSI preservation failed:", e);
+            process.exit(1);
+          });
+          EOF
+          
+          node ansi-test.js
+
+  replay-system:
+    name: Replay System Tests
+    runs-on: ubuntu-latest
+    needs: pty-validation
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Battle
+        run: npm run build
+
+      - name: Test replay recording
+        run: |
+          echo "📼 Testing replay recording..."
+          
+          # Run a Battle test that generates replay
+          node dist/cli.js test <(echo '
+            const { Battle } = require("./dist/index.cjs");
+            
+            async function recordTest() {
+              const battle = new Battle({ 
+                name: "replay-test", 
+                timeout: 5000,
+                replayPath: "./test-replay.json"
+              });
+              
+              return await battle.run(async (b) => {
+                b.spawn("echo", ["replay test"]);
+                await b.expect("replay test");
+              });
+            }
+            
+            recordTest().catch(e => process.exit(1));
+          ')
+          
+          # Check replay file was created
+          if [ ! -f "test-replay.json" ]; then
+            echo "❌ Replay file not created"
+            exit 1
+          fi
+          
+          echo "✅ Replay recording works"
+
+      - name: Test replay export
+        run: |
+          echo "📊 Testing replay export..."
+          
+          # Export replay to HTML
+          if [ -f "test-replay.json" ]; then
+            node dist/cli.js replay export test-replay.json --format html --output test-replay.html
+            
+            if [ ! -f "test-replay.html" ]; then
+              echo "❌ Replay HTML export failed"
+              exit 1
+            fi
+            
+            echo "✅ Replay export works"
+          fi
+
+  integration-examples:
+    name: Integration Examples
+    runs-on: ubuntu-latest
+    needs: replay-system
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Battle
+        run: npm run build
+
+      - name: Test CLI tool integration
+        run: |
+          echo "🔧 Testing CLI tool integration..."
+          
+          # Test Battle can test npm commands
+          cat > npm-test.js << 'EOF'
+          const { Battle } = require("./dist/index.cjs");
+          
+          async function testNpm() {
+            const battle = new Battle({ name: "npm-test", timeout: 30000 });
+            
+            return await battle.run(async (b) => {
+              b.spawn("npm", ["--version"]);
+              await b.expect(/\d+\.\d+\.\d+/);
+            });
+          }
+          
+          testNpm().then(() => console.log("✅ NPM test passed")).catch(e => process.exit(1));
+          EOF
+          
+          node npm-test.js
+
+      - name: Test interactive application
+        run: |
+          echo "💬 Testing interactive application..."
+          
+          # Test interactive shell commands
+          cat > interactive-test.js << 'EOF'
+          const { Battle } = require("./dist/index.cjs");
+          
+          async function testInteractive() {
+            const battle = new Battle({ name: "interactive-test", timeout: 10000 });
+            
+            return await battle.run(async (b) => {
+              // Test node REPL
+              b.spawn("node", ["-i"]);
+              await b.expect("> ");
+              
+              b.sendKey("console.log('battle works')");
+              b.sendKey("enter");
+              await b.expect("battle works");
+              
+              b.sendKey(".exit");
+              b.sendKey("enter");
+              await b.wait(1000);
+            });
+          }
+          
+          testInteractive().then(() => console.log("✅ Interactive test passed")).catch(e => process.exit(1));
+          EOF
+          
+          node interactive-test.js
+
+  performance-bench:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    needs: integration-examples
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Battle
+        run: npm run build
+
+      - name: Benchmark Battle performance
+        run: |
+          echo "⚡ Running performance benchmarks..."
+          
+          # Measure startup time
+          START=$(date +%s%3N)
+          node dist/cli.js --version >/dev/null
+          END=$(date +%s%3N)
+          STARTUP_TIME=$((END - START))
+          echo "📊 CLI startup time: ${STARTUP_TIME}ms"
+          
+          # Benchmark simple test execution
+          cat > perf-test.js << 'EOF'
+          const { Battle } = require("./dist/index.cjs");
+          
+          async function perfTest() {
+            const start = Date.now();
+            
+            const battle = new Battle({ name: "perf", timeout: 5000 });
+            await battle.run(async (b) => {
+              b.spawn("echo", ["performance test"]);
+              await b.expect("performance test");
+            });
+            
+            const duration = Date.now() - start;
+            console.log(`📊 Simple test execution: ${duration}ms`);
+            
+            if (duration > 3000) {
+              throw new Error(`Test too slow: ${duration}ms`);
+            }
+          }
+          
+          perfTest().catch(e => {
+            console.error(e);
+            process.exit(1);
+          });
+          EOF
+          
+          node perf-test.js
+
+  publish:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    needs: [build-test, self-tests, pty-validation, replay-system, integration-examples, performance-bench]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for production
+        run: npm run build
+
+      - name: Run full test suite
+        run: npm test
+
+      - name: Create release package
+        run: |
+          mkdir -p release
+          cp -r dist/ release/
+          cp package.json release/
+          cp README.md release/
+          cp LICENSE release/
+          
+          cd release
+          tar -czf ../battle-release.tar.gz .
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: battle-release
+          path: battle-release.tar.gz
+          retention-days: 30
+
+  notify:
+    name: Notification
+    runs-on: ubuntu-latest
+    needs: [publish]
+    if: always()
+    
+    steps:
+      - name: Success notification
+        if: needs.publish.result == 'success'
+        run: |
+          echo "🎉 Battle CI/CD pipeline completed successfully!"
+          echo "✅ Multi-platform testing completed"
+          echo "✅ Self-testing validation passed (recursive)"
+          echo "✅ PTY vs Pipe detection verified"
+          echo "✅ ANSI preservation confirmed"
+          echo "✅ Replay system validated"
+          echo "✅ Integration examples tested"
+          echo "✅ Performance benchmarks met"
+          echo "📦 Release package created"
+
+      - name: Failure notification
+        if: contains(needs.*.result, 'failure')
+        run: |
+          echo "❌ Battle CI/CD pipeline failed!"
+          echo "⚔️ The universal testing framework needs fixing"
+          exit 1
