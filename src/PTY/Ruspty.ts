@@ -16,7 +16,7 @@ export class Ruspty implements IPTY {
     private _pid: number | undefined
     private dataCallbacks: Array<(data: string) => void> = []
     private exitCallbacks: Array<(code: number) => void> = []
-    private isBun: boolean = typeof Bun !== 'undefined'
+    private isBun: boolean = typeof (globalThis as any).Bun !== 'undefined'
     
     constructor(command: string, args: string[], options: PTYOptions) {
         // Lazy load ruspty - different approach for Bun vs Node
@@ -62,7 +62,9 @@ export class Ruspty implements IPTY {
                     },
                     onExit: (err: any, exitCode: number) => {
                         this._killed = true
-                        this.exitCallbacks.forEach(cb => cb(exitCode || 0))
+                        // Ensure we always have a valid exit code
+                        const code = exitCode ?? (err ? 1 : 0)
+                        this.exitCallbacks.forEach(cb => cb(code))
                     }
                 })
             } else {
@@ -83,7 +85,9 @@ export class Ruspty implements IPTY {
                     },
                     onExit: (err: any, exitCode: number) => {
                         this._killed = true
-                        this.exitCallbacks.forEach(cb => cb(exitCode || 0))
+                        // Ensure we always have a valid exit code
+                        const code = exitCode ?? (err ? 1 : 0)
+                        this.exitCallbacks.forEach(cb => cb(code))
                     }
                 })
             }
@@ -104,8 +108,26 @@ export class Ruspty implements IPTY {
                 this.fd = this.pty.takeFd()
                 const fs = require('fs')
                 
+                let pollTimeout: NodeJS.Timeout | null = null
+                
                 const checkOutput = () => {
-                    if (this._killed) return
+                    if (this._killed) {
+                        // Clean up on exit
+                        if (pollTimeout) {
+                            clearTimeout(pollTimeout)
+                            pollTimeout = null
+                        }
+                        // Close file descriptor if still open
+                        if (this.fd !== undefined) {
+                            try {
+                                fs.closeSync(this.fd)
+                            } catch (e) {
+                                // Ignore close errors
+                            }
+                            this.fd = undefined
+                        }
+                        return
+                    }
                     
                     try {
                         // Use fs.readSync which works in Bun
@@ -120,16 +142,24 @@ export class Ruspty implements IPTY {
                         if (err.code !== 'EAGAIN' && err.code !== 'EWOULDBLOCK') {
                             // Only log real errors
                             if (err.code === 'EBADF' || err.code === 'EIO') {
-                                // PTY closed
+                                // PTY closed - cleanup
                                 this._killed = true
+                                if (this.fd !== undefined) {
+                                    try {
+                                        fs.closeSync(this.fd)
+                                    } catch (e) {
+                                        // Ignore
+                                    }
+                                    this.fd = undefined
+                                }
                                 return
                             }
                         }
                     }
                     
-                    // Continue polling if not killed
+                    // Continue polling if not killed - reduced frequency for better performance
                     if (!this._killed) {
-                        setTimeout(checkOutput, 10)
+                        pollTimeout = setTimeout(checkOutput, 50)  // Reduced from 10ms to 50ms
                     }
                 }
                 
@@ -219,6 +249,17 @@ export class Ruspty implements IPTY {
                     this.pty.kill()
                 }
                 this._killed = true
+                
+                // Clean up file descriptor for Bun
+                if (this.isBun && this.fd !== undefined) {
+                    try {
+                        const fs = require('fs')
+                        fs.closeSync(this.fd)
+                    } catch (e) {
+                        // Ignore close errors
+                    }
+                    this.fd = undefined
+                }
             } catch (err) {
                 // Process might already be dead
             }

@@ -1,3 +1,5 @@
+import { SecurityLevel } from '../security/SafeCommandMode.js'
+
 export interface BattleOptions {
     command?: string
     args?: string[]
@@ -9,6 +11,9 @@ export interface BattleOptions {
     screenshotDir?: string
     logDir?: string
     verbose?: boolean
+    // Security options
+    securityLevel?: SecurityLevel
+    safeCommandMode?: boolean
 }
 
 export interface TestResult {

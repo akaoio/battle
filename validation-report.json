@@ -1,0 +1,115 @@
+{
+  "timestamp": "2025-08-26T08:27:38.190Z",
+  "summary": {
+    "passed": 9,
+    "failed": 5,
+    "successRate": 64
+  },
+  "criticalAreas": {
+    "TypeScript": true,
+    "Build": true,
+    "Security": true,
+    "Memory": false,
+    "Resources": false
+  },
+  "results": [
+    {
+      "name": "TypeScript compilation",
+      "success": true,
+      "duration": 4384,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "Build process",
+      "success": true,
+      "duration": 6978,
+      "output": "\n> @akaoio/battle@1.1.3 build\n> akao-build\n\nBuilding...\nCLI Building entry: src/cli.ts, src/index.ts\nCLI Using tsconfig: tsconfig.json\nCLI tsup v8.5.0\nCLI Using tsup config: /home/x/core/projects/batt",
+      "error": ""
+    },
+    {
+      "name": "Command injection blocked (semicolon)",
+      "success": true,
+      "duration": 1241,
+      "output": "",
+      "error": "\u001b[31mSecurity Error:\u001b[0m Dangerous pattern detected: /[;&|`$<>]/\n"
+    },
+    {
+      "name": "Command injection blocked (pipe)",
+      "success": true,
+      "duration": 1079,
+      "output": "",
+      "error": "\u001b[31mSecurity Error:\u001b[0m Dangerous pattern detected: /[;&|`$<>]/\n"
+    },
+    {
+      "name": "Command injection blocked (backticks)",
+      "success": true,
+      "duration": 1085,
+      "output": "",
+      "error": "\u001b[31mSecurity Error:\u001b[0m Dangerous pattern detected: /[;&|`$<>]/\n"
+    },
+    {
+      "name": "Safe command allowed",
+      "success": true,
+      "duration": 1216,
+      "output": "\u001b[32mTest passed\u001b[0m\n\u001b[34mReplay saved: logs/replay-1756196847747.json\u001b[0m\n\u001b[90mTo replay: battle replay play logs/replay-1756196847747.json\u001b[0m\n",
+      "error": ""
+    },
+    {
+      "name": "Circular buffer limits",
+      "success": false,
+      "duration": 214,
+      "output": "",
+      "error": "file:///home/x/core/projects/battle/test-memory.js:2\nconst { TerminalOutputBuffer } = require('./dist/index.cjs');\n                                 ^\n\nReferenceError: require is not defined in ES modu"
+    },
+    {
+      "name": "PTY lifecycle manager",
+      "success": false,
+      "duration": 204,
+      "output": "",
+      "error": "file:///home/x/core/projects/battle/test-lifecycle.js:2\nconst { PTYLifecycleManager } = require('./dist/index.cjs');\n                                ^\n\nReferenceError: require is not defined in ES mod"
+    },
+    {
+      "name": "Path traversal prevention",
+      "success": false,
+      "duration": 177,
+      "output": "",
+      "error": "file:///home/x/core/projects/battle/test-path.js:2\nconst { Security } = require('./dist/index.cjs');\n                     ^\n\nReferenceError: require is not defined in ES module scope, you can use impo"
+    },
+    {
+      "name": "Environment variable sanitization",
+      "success": false,
+      "duration": 205,
+      "output": "",
+      "error": "file:///home/x/core/projects/battle/test-env.js:2\nconst { Security } = require('./dist/index.cjs');\n                     ^\n\nReferenceError: require is not defined in ES module scope, you can use impor"
+    },
+    {
+      "name": "JSON validation & anti-pollution",
+      "success": false,
+      "duration": 202,
+      "output": "",
+      "error": "file:///home/x/core/projects/battle/test-json.js:2\nconst { Security } = require('./dist/index.cjs');\n                     ^\n\nReferenceError: require is not defined in ES module scope, you can use impo"
+    },
+    {
+      "name": "Battle basic test",
+      "success": true,
+      "duration": 1171,
+      "output": "\u001b[32mTest passed\u001b[0m\n\u001b[34mReplay saved: logs/replay-1756196849962.json\u001b[0m\n\u001b[90mTo replay: battle replay play logs/replay-1756196849962.json\u001b[0m\n",
+      "error": ""
+    },
+    {
+      "name": "Battle with args",
+      "success": true,
+      "duration": 1171,
+      "output": "\u001b[32mTest passed\u001b[0m\n\u001b[34mReplay saved: logs/replay-1756196851136.json\u001b[0m\n\u001b[90mTo replay: battle replay play logs/replay-1756196851136.json\u001b[0m\n",
+      "error": ""
+    },
+    {
+      "name": "Build performance (<10s)",
+      "success": true,
+      "duration": 6985,
+      "output": "\n> @akaoio/battle@1.1.3 build\n> akao-build\n\nBuilding...\nCLI Building entry: src/cli.ts, src/index.ts\nCLI Using tsconfig: tsconfig.json\nCLI tsup v8.5.0\nCLI Using tsup config: /home/x/core/projects/batt",
+      "error": ""
+    }
+  ]
+}

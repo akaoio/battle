@@ -69,11 +69,8 @@ export class PlaybackEngine {
         this.state.isPaused = true
         
         if (this.animationFrame) {
-            if (typeof cancelAnimationFrame !== 'undefined') {
-                cancelAnimationFrame(this.animationFrame)
-            } else if (this.animationFrame) {
-                clearTimeout(this.animationFrame)
-            }
+            // Use clearTimeout for both browser and Node.js environments
+            clearTimeout(this.animationFrame as any)
             this.animationFrame = null
         }
         
@@ -218,13 +215,9 @@ export class PlaybackEngine {
             return
         }
         
-        // Schedule next frame
-        if (typeof requestAnimationFrame !== 'undefined') {
-            this.animationFrame = requestAnimationFrame(() => this.scheduleNextFrame())
-        } else {
-            // Fallback for Node.js environment
-            this.animationFrame = setTimeout(() => this.scheduleNextFrame(), 16)
-        }
+        // Schedule next frame - use consistent setTimeout for all environments
+        // 16ms = ~60fps, works in both Node.js and browser
+        this.animationFrame = setTimeout(() => this.scheduleNextFrame(), 16) as any
     }
 
     private notifyEvent(event: any): void {

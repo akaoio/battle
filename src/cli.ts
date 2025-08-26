@@ -9,6 +9,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { Battle, Runner, Silent } from './index.js'
 import { Replay } from './Replay/index.js'
+import { CommandSanitizer, SecureErrorHandler } from './security/index.js'
 import fs from 'fs'
 import path from 'path'
 import { color as chalk } from './utils/colors.js'
@@ -147,13 +148,24 @@ async function main() {
     } else if (command === 'run') {
         // Run single command test
         const cmd = argv.command as string
+        // Validate command for security
+        const validation = CommandSanitizer.validate(cmd)
+        if (!validation.valid) {
+            console.error(chalk.red('Security Error:'), validation.error)
+            process.exit(1)
+        }
+        
         const battle = new Battle({
             verbose: argv.verbose,
             timeout: argv.timeout
         })
         
         const result = await battle.run(async (b) => {
-            const [program, ...args] = cmd.split(' ')
+            // Parse command safely
+            const parts = cmd.trim().split(/\s+/)
+            const program = parts[0]
+            const args = CommandSanitizer.sanitizeArgs(parts.slice(1))
+            
             b.spawn(program, args)
             
             if (argv.screenshot) {

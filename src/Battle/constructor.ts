@@ -1,4 +1,5 @@
 import { Replay } from '../Replay/index.js'
+import { SecurityLevel } from '../security/SafeCommandMode.js'
 import type { BattleOptions } from '../types/index.js'
 
 export function constructor(this: any, options: BattleOptions = {}) {
@@ -17,6 +18,10 @@ export function constructor(this: any, options: BattleOptions = {}) {
         verbose: false,
         ...options
     }
+    
+    // Security settings - can be overridden by user
+    this.securityLevel = options.securityLevel || SecurityLevel.BALANCED
+    this.safeCommandMode = options.safeCommandMode !== false // Default to true
     
     this.pty = null
     this.output = ''

@@ -1,5 +1,32 @@
 # Battle Framework - Technical Documentation
 
+> **Last Updated**: August 2025  
+> **Version**: 1.1.3  
+> **License**: MIT  
+> **Language**: TypeScript
+
+## Project Overview
+
+**@akaoio/battle** is a universal terminal application testing framework that provides real PTY (Pseudo-Terminal) emulation with JSON replay capabilities. Unlike traditional pipe-based testing that creates false confidence through abstraction, Battle tests applications exactly as users interact with them - in real terminal environments.
+
+### Key Features
+
+- **Real PTY Emulation**: Direct kernel PTY allocation via node-pty/ruspty
+- **Cross-Runtime Support**: Works with Node.js, Bun, and TypeScript
+- **JSON Replay System**: Record, playback, and analyze terminal sessions
+- **Screenshot Capture**: Visual debugging with terminal state snapshots
+- **Interactive Testing**: Simulate keyboard input, mouse events, and terminal resizing
+- **Zero Technical Debt**: Complete implementation without placeholders
+
+### Why Battle Exists
+
+Standard testing approaches fail to catch real-world terminal issues:
+- **Pipe testing** strips ANSI codes and provides false TTY detection
+- **Mock testing** doesn't reflect actual terminal behavior  
+- **Unit testing** misses integration issues between components
+
+Battle solves this by providing authentic terminal environments for testing.
+
 ## Executive Summary
 
 Battle is a terminal application testing framework implementing real PTY (Pseudo-Terminal) emulation with JSON replay capabilities. The framework provides deterministic testing of terminal applications through event recording.
@@ -376,4 +403,6 @@ Battle provides real PTY emulation for terminal application testing, moving beyo
 
 ---
 
-*Battle Framework v1.0.0*
+*Generated with @akaoio/composer on 2025-08-26*
+
+*Battle Framework v1.1.3*

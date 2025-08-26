@@ -10,7 +10,7 @@ export function addTest(this: any, name: string, testCase: TestCase): void {
     }
     
     this.suites[this.suites.length - 1].tests.push({
-        name,
-        ...testCase
+        ...testCase,
+        name
     })
 }

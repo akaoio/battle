@@ -7,7 +7,7 @@ import { constructor } from './constructor.js'
 import { spawn } from './spawn.js'
 import { interact } from './interact.js'
 import { screenshot } from './screenshot.js'
-import { expect } from './expect.js'
+import { expect, expectVisualChange, sendKeyAndDetectResponse } from './expect.js'
 import { log } from './log.js'
 import { cleanup } from './cleanup.js'
 import { run } from './run.js'
@@ -46,6 +46,14 @@ export class Battle {
     
     async expect(pattern: string | RegExp, timeout?: number) {
         return expect.call(this, pattern, timeout)
+    }
+    
+    async expectVisualChange(timeout?: number) {
+        return expectVisualChange.call(this, timeout)
+    }
+    
+    async sendKeyAndDetectResponse(key: string, timeout?: number) {
+        return sendKeyAndDetectResponse.call(this, key, timeout)
     }
     
     log(level: string, message: string) {

@@ -9,6 +9,12 @@ export { Silent } from './Silent/index.js'
 export { Replay } from './Replay/index.js'
 export * from './types/index.js'
 
+// Export security utilities
+export * as Security from './security/index.js'
+export { SecurityLevel, SafeCommandMode } from './security/SafeCommandMode.js'
+export { CircularBuffer, TerminalOutputBuffer } from './utils/CircularBuffer.js'
+export { ResourceManager, PTYLifecycleManager, EventListenerTracker } from './utils/ResourceManager.js'
+
 // Quick test function
 export async function test(
     name: string,

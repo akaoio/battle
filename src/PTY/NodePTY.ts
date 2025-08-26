@@ -35,9 +35,11 @@ export class NodePTY implements IPTY {
     }
     
     onExit(callback: (code: number) => void): void {
-        this.pty.onExit(({ exitCode }: any) => {
+        this.pty.onExit(({ exitCode, signal }: any) => {
             this._killed = true
-            callback(exitCode)
+            // Ensure we always have a valid exit code
+            const code = exitCode ?? (signal ? 128 : 0)
+            callback(code)
         })
     }
     
