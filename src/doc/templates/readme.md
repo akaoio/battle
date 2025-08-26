@@ -10,7 +10,7 @@
 
 ## Why Battle?
 
-{{#each core_principles}}
+{{#each features.core_principles}}
 ### {{icon}} {{name}}
 {{description}}
 **{{benefit}}**
@@ -19,48 +19,48 @@
 
 ## Features
 
-{{#each features}}
+{{#each features.features}}
 - {{icon}} **{{name}}**: {{description}}
 {{/each}}
 
 ## Installation
 
 ```bash
-{{installation.npm}}
+{{usage.installation.npm}}
 ```
 
 ## Quick Start
 
 ### Basic Usage
 ```typescript
-{{basic_usage}}
+{{usage.basic_usage}}
 ```
 
 ### Advanced Usage with Replay
 ```typescript
-{{advanced_usage}}
+{{usage.advanced_usage}}
 ```
 
 ### CLI Usage
 ```bash
-{{cli_usage}}
+{{usage.cli_usage}}
 ```
 
 ## Testing Patterns
 
 ### Interactive Applications
 ```typescript
-{{testing_patterns.interactive_apps}}
+{{usage.testing_patterns.interactive_apps}}
 ```
 
 ### Error Handling
 ```typescript
-{{testing_patterns.error_handling}}
+{{usage.testing_patterns.error_handling}}
 ```
 
 ### Long-Running Processes
 ```typescript
-{{testing_patterns.long_running}}
+{{usage.testing_patterns.long_running}}
 ```
 
 ## Architecture
@@ -68,16 +68,16 @@
 Battle follows the @akaoio principle of "Class = Directory + Method-per-file":
 
 ```
-{{class_structure.layout}}
+{{architecture.class_structure.layout}}
 ```
 
-{{class_structure.rationale}}
+{{architecture.class_structure.rationale}}
 
 ## Performance vs Accuracy Trade-off
 
 | Operation | Pipe Testing | PTY Testing | Overhead | Worth It? |
 |-----------|-------------|-------------|----------|-----------|
-{{#each performance.overhead_comparison}}
+{{#each architecture.performance.overhead_comparison}}
 | {{operation}} | {{pipe_testing}} | {{pty_testing}} | {{overhead}} | {{worth_it}} |
 {{/each}}
 
