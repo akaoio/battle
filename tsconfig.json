@@ -14,7 +14,7 @@
     "sourceMap": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "types": ["node", "bun"],
+    "types": ["node"],
     "resolveJsonModule": true,
     "allowJs": false,
     "noEmit": true

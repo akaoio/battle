@@ -14,72 +14,68 @@ import fs from 'fs'
 import path from 'path'
 import { color as chalk } from './utils/colors.js'
 
-const argv = yargs(hideBin(process.argv))
-    .command('test [file]', 'Run tests from a file or directory', (yargs) => {
-        return yargs
-            .positional('file', {
-                describe: 'Test file or directory',
-                default: './test'
-            })
-    })
-    .command('run <command>', 'Run a single command test', (yargs) => {
-        return yargs
-            .positional('command', {
-                describe: 'Command to test',
-                type: 'string'
-            })
-    })
-    .command('silent <command>', 'Run a silent (non-interactive) test', (yargs) => {
-        return yargs
-            .positional('command', {
-                describe: 'Command to test',
-                type: 'string'
-            })
-    })
-    .command('replay <action> [file]', 'Replay operations', (yargs) => {
-        return yargs
-            .positional('action', {
-                describe: 'Action: play, export',
-                choices: ['play', 'export'],
-                type: 'string'
-            })
-            .positional('file', {
-                describe: 'Replay file path',
-                type: 'string'
-            })
-            .option('speed', {
-                type: 'number',
-                description: 'Playback speed multiplier',
-                default: 1.0
-            })
-            .option('format', {
-                type: 'string',
-                description: 'Export format (html, json)',
-                choices: ['html', 'json'],
-                default: 'html'
-            })
-    })
-    .option('verbose', {
-        alias: 'v',
-        type: 'boolean',
-        description: 'Verbose output'
-    })
-    .option('screenshot', {
-        alias: 's',
-        type: 'boolean',
-        description: 'Take screenshots'
-    })
-    .option('timeout', {
-        alias: 't',
-        type: 'number',
-        description: 'Test timeout in ms',
-        default: 10000
-    })
-    .help()
-    .alias('help', 'h')
-    .parseSync()
+// Yargs configuration moved to main function
 
 async function main() {
+    const argv = await yargs(hideBin(process.argv))
+        .command('test [file]', 'Run tests from a file or directory', (yargs) => {
+            return yargs
+                .positional('file', {
+                    describe: 'Test file or directory',
+                    default: './test'
+                })
+        })
+        .command('run <command>', 'Run a single command test', (yargs) => {
+            return yargs
+                .positional('command', {
+                    describe: 'Command to test',
+                    type: 'string'
+                })
+        })
+        .command('silent <command>', 'Run a silent (non-interactive) test', (yargs) => {
+            return yargs
+                .positional('command', {
+                    describe: 'Command to test',
+                    type: 'string'
+                })
+        })
+        .command('replay <action> [file]', 'Replay operations', (yargs) => {
+            return yargs
+                .positional('action', {
+                    describe: 'Action: play, export',
+                    choices: ['play', 'export'] as const,
+                    type: 'string'
+                })
+                .positional('file', {
+                    describe: 'Replay file path',
+                    type: 'string'
+                })
+                .option('speed', {
+                    type: 'number',
+                    description: 'Playback speed multiplier',
+                    default: 1.0
+                })
+                .option('format', {
+                    type: 'string',
+                    description: 'Export format (html, json)',
+                    choices: ['html', 'json'] as const,
+                    default: 'html'
+                })
+        })
+        .option('verbose', {
+            alias: 'v',
+            type: 'boolean',
+            description: 'Enable verbose output'
+        })
+        .option('timeout', {
+            alias: 't',
+            type: 'number',
+            description: 'Timeout in seconds',
+            default: 30
+        })
+        .help()
+        .alias('help', 'h')
+        .parseAsync()
     const command = argv._[0] as string
     
     if (command === 'test') {
@@ -189,8 +185,20 @@ async function main() {
         }
         
     } else if (command === 'silent') {
-        // Run silent test
+        // Run silent test with security warning
         const cmd = argv.command as string
+        
+        console.log(chalk.yellow('WARNING: Silent mode bypasses PTY security features'))
+        console.log(chalk.yellow('Consider using "battle run" for secure command execution'))
+        
+        // Validate command for security
+        const validation = CommandSanitizer.validate(cmd)
+        if (!validation.valid) {
+            console.error(chalk.red('Security Error:'), validation.error)
+            console.error(chalk.gray('Use "battle run" for secure command execution'))
+            process.exit(1)
+        }
+        
         const silent = new Silent()
         const result = silent.exec(cmd)
         
@@ -250,8 +258,14 @@ async function main() {
         }
         
     } else {
-        // Show help
-        yargs.showHelp()
+        // Show help - just log usage info since no command provided
+        console.log('Usage: battle <command> [options]')
+        console.log('Commands:')
+        console.log('  test [file]         Run tests from file or directory')
+        console.log('  run <command>       Run a single command test')
+        console.log('  silent <command>    Run a silent test')
+        console.log('  replay <action>     Replay operations')
+        console.log('\nUse --help for more information')
     }
 }
 

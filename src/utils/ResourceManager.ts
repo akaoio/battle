@@ -12,13 +12,28 @@ export class ResourceManager extends EventEmitter {
     private cleanupCallbacks: Map<string, () => Promise<void>> = new Map()
     private disposed: boolean = false
     private maxResources: number = 100
+    private registrationTimestamps: Map<string, number> = new Map()
+    private lastCleanup: number = 0
+    private readonly CLEANUP_INTERVAL = 5 * 60 * 1000 // 5 minutes
+    private readonly MAX_REGISTRATIONS_PER_MINUTE = 60
     
     /**
-     * Registers a resource for tracking
+     * Registers a resource for tracking with rate limiting
      */
     register(id: string, resource: IResource, cleanup?: () => Promise<void>): void {
         if (this.disposed) {
             throw new Error('ResourceManager has been disposed')
+        }
+        
+        // Rate limiting check
+        const now = Date.now()
+        this.cleanupOldTimestamps(now)
+        
+        const recentRegistrations = Array.from(this.registrationTimestamps.values())
+            .filter(timestamp => now - timestamp < 60000) // Last minute
+        
+        if (recentRegistrations.length >= this.MAX_REGISTRATIONS_PER_MINUTE) {
+            throw new Error(`Rate limit exceeded: too many resource registrations (max ${this.MAX_REGISTRATIONS_PER_MINUTE}/minute)`)
         }
         
         if (this.resources.size >= this.maxResources) {
@@ -30,6 +45,7 @@ export class ResourceManager extends EventEmitter {
         }
         
         this.resources.set(id, resource)
+        this.registrationTimestamps.set(id, now)
         
         if (cleanup) {
             this.cleanupCallbacks.set(id, cleanup)
@@ -61,6 +77,7 @@ export class ResourceManager extends EventEmitter {
             
             this.resources.delete(id)
             this.cleanupCallbacks.delete(id)
+            this.registrationTimestamps.delete(id)
             
             this.emit('resource:unregistered', id)
         } catch (error) {
@@ -108,6 +125,7 @@ export class ResourceManager extends EventEmitter {
         
         this.resources.clear()
         this.cleanupCallbacks.clear()
+        this.registrationTimestamps.clear()
         
         if (errors.length > 0) {
             this.emit('dispose:errors', errors)
@@ -115,6 +133,21 @@ export class ResourceManager extends EventEmitter {
         
         this.emit('disposed')
         this.removeAllListeners()
+    }
+    
+    /**
+     * Cleans up old timestamps for rate limiting
+     */
+    private cleanupOldTimestamps(now: number): void {
+        if (now - this.lastCleanup > this.CLEANUP_INTERVAL) {
+            const cutoff = now - 60000 // Remove timestamps older than 1 minute
+            for (const [id, timestamp] of this.registrationTimestamps.entries()) {
+                if (timestamp < cutoff) {
+                    this.registrationTimestamps.delete(id)
+                }
+            }
+            this.lastCleanup = now
+        }
     }
     
     /**

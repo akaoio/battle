@@ -45,6 +45,11 @@ module.exports = {
       target: 'README.md',
       template: 'src/doc/templates/readme.md',
       format: 'markdown'
+    },
+    {
+      target: 'CLAUDE.md',
+      template: 'src/doc/templates/claude.md',
+      format: 'markdown'
     }
   ]
 }

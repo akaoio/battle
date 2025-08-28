@@ -1,15 +1,15 @@
-# CLAUDE.md - @akaoio/battle
+# CLAUDE.md - {{project.name}}
 
-This file provides guidance to Claude Code (claude.ai/code) when working with the @akaoio/battle codebase.
+This file provides guidance to Claude Code (claude.ai/code) when working with the {{project.name}} codebase.
 
 ## Project Overview
 
-**@akaoio/battle** - Universal terminal application testing framework with real PTY emulation
+**{{project.name}}** - {{project.description}}
 
-**Version**: 1.2.0  
-**License**: MIT  
-**Author**: AKAO Team  
-**Repository**: https://github.com/akaoio/battle  
+**Version**: {{package.version}}  
+**License**: {{project.license}}  
+**Author**: {{project.author}}  
+**Repository**: {{project.repository}}  
 **Philosophy**: "Real PTY testing over fake pipes - accuracy over speed"
 
 ## 🚨 CRITICAL: Build Architecture Rules
@@ -29,18 +29,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ### Class = Directory + Method-per-file Pattern
 
-Battle/
-├── index.ts        # Class definition with delegation
-├── constructor.ts  # Initialization logic
-├── spawn.ts        # Process spawning with PTY allocation
-├── expect.ts       # Pattern matching with timeout control
-├── sendKey.ts      # Keyboard input simulation  
-├── screenshot.ts   # Terminal state capture
-├── run.ts          # Test execution orchestration
-└── cleanup.ts      # Resource deallocation
+{{architecture.class_structure.layout}}
 
-
-Method isolation enables independent testing, hot-reloading, and atomic refactoring while maintaining class cohesion
+{{architecture.class_structure.rationale}}
 
 ### Core Components
 
@@ -53,43 +44,19 @@ Method isolation enables independent testing, hot-reloading, and atomic refactor
 
 ## Core Features
 
+{{#each features.features}}
+### {{name}}
+{{description}}
 
-### Real PTY Emulation
-Uses actual pseudo-terminals, not fake pipes, to catch all bugs
-
-
-### StarCraft-Style Replay
-Record and playback terminal sessions with microsecond precision
-
-
-### Self-Testing Framework
-Tests itself recursively to ensure framework reliability
-
-
-### Cross-Platform
-Works on Linux, macOS, Windows with native PTY support
-
-
-### Visual Debugging
-HTML replay export with YouTube-style controls
-
-
-### Zero Mock Policy
-100% real implementation - no mocks, stubs, or fakes
-
-
+{{/each}}
 
 ## Testing Philosophy
 
 ### PTY over Pipes Trade-off
 
-
-- **Process spawn**: ~15ms vs ~5ms (3×) → YES - catches TTY bugs
-
-- **Character I/O**: ~10μs vs <1μs (10×) → YES - real buffering
-
-- **Pattern match**: ~5ms vs ~1ms (5×) → YES - ANSI sequences
-
+{{#each architecture.performance.overhead_comparison}}
+- **{{operation}}**: {{pty_testing}} vs {{pipe_testing}} ({{overhead}}) → {{worth_it}}
+{{/each}}
 
 **Core Principle**: Accept 3-10× performance overhead for 99% bug detection accuracy.
 
@@ -141,48 +108,13 @@ When modifying security code:
 
 ### Testing Patterns
 
-
-#### interactive_apps
+{{#each usage.testing_patterns}}
+#### {{@key}}
 ```typescript
-// Test interactive CLI apps
-const battle = new Battle()
-await battle.run(async (b) => {
-  b.spawn('npx', ['create-react-app', 'test-app'])
-  await b.expect('What would you like to name')
-  b.type('my-app')
-  b.sendKey('enter')
-  await b.expect('Success! Created my-app')
-})
-
+{{this}}
 ```
 
-
-#### error_handling
-```typescript
-// Test error conditions
-const battle = new Battle()
-await battle.run(async (b) => {
-  b.spawn('npm', ['install', 'non-existent-package'])
-  await b.expect('ERR!')  // NPM error prefix
-  // Test continues even after process exits with error
-})
-
-```
-
-
-#### long_running
-```typescript
-// Test long-running processes
-const battle = new Battle({ timeout: 120000 })
-await battle.run(async (b) => {
-  b.spawn('npm', ['run', 'build'])
-  await b.expect('Build started')
-  await b.expect('Build complete', 60000)  // Wait up to 1 minute
-})
-
-```
-
-
+{{/each}}
 
 ## Available Scripts
 
@@ -323,4 +255,4 @@ When working with security code:
 **Battle Philosophy**: "If it works in a pipe but fails in a PTY, it's not ready for production."
 
 *Built with real PTY emulation for real-world accuracy*
-*Version: 1.2.0 | License: MIT | Author: AKAO Team*
+*Version: {{package.version}} | License: {{project.license}} | Author: {{project.author}}*

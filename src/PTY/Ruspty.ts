@@ -5,6 +5,7 @@
  */
 
 import type { IPTY, PTYOptions } from './index.js'
+import { SecureErrorHandler, ResourceLimiter } from '../security/index.js'
 
 // Dynamic import to avoid loading in Node.js runtime
 let Pty: any
@@ -19,6 +20,11 @@ export class Ruspty implements IPTY {
     private isBun: boolean = typeof (globalThis as any).Bun !== 'undefined'
     
     constructor(command: string, args: string[], options: PTYOptions) {
+        // Check PTY resource limits
+        if (!ResourceLimiter.acquirePTY()) {
+            throw new Error('PTY instance limit exceeded - too many active PTYs')
+        }
+        
         // Lazy load ruspty - different approach for Bun vs Node
         if (!Pty) {
             try {
@@ -33,11 +39,14 @@ export class Ruspty implements IPTY {
                     const ruspty = require('@akaoio/ruspty')
                     Pty = ruspty.Pty
                 }
-            } catch (err) {
+            } catch (err: any) {
+                ResourceLimiter.releasePTY()
+                const sanitizedError = SecureErrorHandler.sanitize(err)
                 throw new Error(
                     '@akaoio/ruspty is not installed or failed to load.\n' +
                     'Run: npm install @akaoio/ruspty\n' +
-                    'Note: ARM64 support is included'
+                    'Note: ARM64 support is included\n' +
+                    `Error: ${sanitizedError}`
                 )
             }
         }
@@ -64,7 +73,15 @@ export class Ruspty implements IPTY {
                         this._killed = true
                         // Ensure we always have a valid exit code
                         const code = exitCode ?? (err ? 1 : 0)
-                        this.exitCallbacks.forEach(cb => cb(code))
+                        this.exitCallbacks.forEach(cb => {
+                            try {
+                                cb(code)
+                            } catch (callbackError) {
+                                SecureErrorHandler.log(callbackError, 'Exit callback error')
+                            }
+                        })
+                        // Release PTY resource
+                        ResourceLimiter.releasePTY()
                     }
                 })
             } else {
@@ -87,7 +104,15 @@ export class Ruspty implements IPTY {
                         this._killed = true
                         // Ensure we always have a valid exit code
                         const code = exitCode ?? (err ? 1 : 0)
-                        this.exitCallbacks.forEach(cb => cb(code))
+                        this.exitCallbacks.forEach(cb => {
+                            try {
+                                cb(code)
+                            } catch (callbackError) {
+                                SecureErrorHandler.log(callbackError, 'Exit callback error')
+                            }
+                        })
+                        // Release PTY resource
+                        ResourceLimiter.releasePTY()
                     }
                 })
             }
@@ -97,7 +122,9 @@ export class Ruspty implements IPTY {
             // Set up data streaming
             this.setupDataStream()
         } catch (err: any) {
-            throw new Error(`Failed to create PTY: ${err.message}`)
+            ResourceLimiter.releasePTY()
+            const sanitizedError = SecureErrorHandler.sanitize(err)
+            throw new Error(`Failed to create PTY: ${sanitizedError}`)
         }
     }
     
@@ -118,14 +145,7 @@ export class Ruspty implements IPTY {
                             pollTimeout = null
                         }
                         // Close file descriptor if still open
-                        if (this.fd !== undefined) {
-                            try {
-                                fs.closeSync(this.fd)
-                            } catch (e) {
-                                // Ignore close errors
-                            }
-                            this.fd = undefined
-                        }
+                        this.cleanupFileDescriptor()
                         return
                     }
                     
@@ -135,7 +155,14 @@ export class Ruspty implements IPTY {
                         const bytesRead = fs.readSync(this.fd!, buffer, 0, 4096, null)
                         if (bytesRead > 0) {
                             const text = buffer.slice(0, bytesRead).toString()
-                            this.dataCallbacks.forEach(cb => cb(text))
+                            this.dataCallbacks.forEach(cb => {
+                                try {
+                                    cb(text)
+                                } catch (callbackError) {
+                                    // Prevent callback errors from killing the polling loop
+                                    console.error('Data callback error:', callbackError)
+                                }
+                            })
                         }
                     } catch (err: any) {
                         // EAGAIN means no data available yet - that's normal
@@ -144,14 +171,13 @@ export class Ruspty implements IPTY {
                             if (err.code === 'EBADF' || err.code === 'EIO') {
                                 // PTY closed - cleanup
                                 this._killed = true
-                                if (this.fd !== undefined) {
-                                    try {
-                                        fs.closeSync(this.fd)
-                                    } catch (e) {
-                                        // Ignore
-                                    }
-                                    this.fd = undefined
-                                }
+                                this.cleanupFileDescriptor()
+                                return
+                            } else {
+                                // Unexpected error - log and cleanup to prevent fd leak
+                                console.error('Unexpected PTY read error:', err)
+                                this._killed = true
+                                this.cleanupFileDescriptor()
                                 return
                             }
                         }
@@ -250,18 +276,28 @@ export class Ruspty implements IPTY {
                 }
                 this._killed = true
                 
-                // Clean up file descriptor for Bun
-                if (this.isBun && this.fd !== undefined) {
-                    try {
-                        const fs = require('fs')
-                        fs.closeSync(this.fd)
-                    } catch (e) {
-                        // Ignore close errors
-                    }
-                    this.fd = undefined
-                }
+                // Clean up file descriptor
+                this.cleanupFileDescriptor()
             } catch (err) {
-                // Process might already be dead
+                // Process might already be dead - ensure cleanup still happens
+                this._killed = true
+                this.cleanupFileDescriptor()
+            }
+        }
+    }
+    
+    /**
+     * Safely cleans up file descriptor to prevent leaks
+     */
+    private cleanupFileDescriptor(): void {
+        if (this.isBun && this.fd !== undefined) {
+            try {
+                const fs = require('fs')
+                fs.closeSync(this.fd)
+            } catch (e) {
+                // Ignore close errors - fd might already be closed
+            } finally {
+                this.fd = undefined
             }
         }
     }

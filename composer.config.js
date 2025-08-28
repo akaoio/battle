@@ -1,4 +1,4 @@
-// @akaoio/composer configuration
+// @akaoio/composer configuration for Battle cortex
 module.exports = {
   sources: {
     docs: {
@@ -13,6 +13,21 @@ module.exports = {
     {
       target: 'README.md',
       template: 'templates/readme.md',
+      data: 'docs'
+    },
+    {
+      target: 'CLAUDE.md',
+      template: 'templates/claude.md',
+      data: 'docs'
+    },
+    {
+      target: 'API.md',
+      template: 'templates/api.md',
+      data: 'docs'
+    },
+    {
+      target: 'PTY-ARCHITECTURE.md',
+      template: 'templates/pty-architecture.md',
       data: 'docs'
     }
   ],

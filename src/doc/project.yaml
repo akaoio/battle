@@ -1,12 +1,22 @@
-title: "My Project"
-description: "A sample project using @akaoio/composer"
-name: "@my/project"
+title: "@akaoio/battle"
+description: "Universal terminal application testing framework with real PTY emulation and screenshots"
+name: "@akaoio/battle"
 usage: |
-  import { MyProject } from '@my/project'
+  import { Battle } from "@akaoio/battle"
   
-  const project = new MyProject()
-  project.run()
+  const battle = new Battle({
+    command: 'npm',
+    args: ['install'],
+    timeout: 30000
+  })
+  
+  await battle.spawn()
+  await battle.expect('packages installed')
+  battle.cleanup()
 features:
-  - "Feature 1"
-  - "Feature 2" 
-  - "Feature 3"
+  - "Real PTY Emulation - Uses actual pseudo-terminals, not fake pipes"
+  - "StarCraft-Style Replay - Record and playback with microsecond precision" 
+  - "Self-Testing Framework - Tests itself recursively for reliability"
+  - "Cross-Platform Support - Linux, macOS, Windows with native PTY"
+  - "Visual Debugging - HTML replay export with YouTube-style controls"
+  - "Zero Mock Policy - 100% real implementation, no mocks or stubs"
