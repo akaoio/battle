@@ -5,9 +5,9 @@
  * Command-line interface for the Battle testing framework
  */
 
-// @ts-ignore - yargs types not available in workspace
+// @ts-ignore - yargs types in workspace conflict
 import yargs from 'yargs'
-// @ts-ignore - yargs types not available in workspace
+// @ts-ignore - yargs types in workspace conflict  
 import { hideBin } from 'yargs/helpers'
 import { Battle, Runner, Silent } from './index.js'
 import { Replay } from './Replay/index.js'
