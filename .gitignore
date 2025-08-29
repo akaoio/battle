@@ -5,6 +5,10 @@ logs/
 screenshots/
 test-logs/
 test-screenshots/
+replay-*.json
+battle-*.log
+validation-report.json
+validate-all.cjs
 coverage/
 .nyc_output/
 *.tsbuildinfo
