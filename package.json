@@ -1,6 +1,6 @@
 {
   "name": "@akaoio/battle",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Universal terminal application testing framework with real PTY emulation and screenshots",
   "type": "module",
   "main": "dist/index.cjs",
@@ -69,7 +69,7 @@
     "@akaoio/ruspty": "^3.6.1",
     "@replit/ruspty": "^3.5.2",
     "@replit/ruspty-linux-x64-gnu": "^3.5.2",
-    "@replit/ruspty-darwin-x64": "^3.5.2", 
+    "@replit/ruspty-darwin-x64": "^3.5.2",
     "@replit/ruspty-darwin-arm64": "^3.5.2",
     "@akaoio/ruspty-linux-arm64-gnu": "^3.6.1"
   },
