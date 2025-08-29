@@ -5,7 +5,9 @@
  * Command-line interface for the Battle testing framework
  */
 
+// @ts-ignore - yargs types not available in workspace
 import yargs from 'yargs'
+// @ts-ignore - yargs types not available in workspace
 import { hideBin } from 'yargs/helpers'
 import { Battle, Runner, Silent } from './index.js'
 import { Replay } from './Replay/index.js'
@@ -18,28 +20,28 @@ import { color as chalk } from './utils/colors.js'
 
 async function main() {
     const argv = await yargs(hideBin(process.argv))
-        .command('test [file]', 'Run tests from a file or directory', (yargs) => {
+        .command('test [file]', 'Run tests from a file or directory', (yargs: any) => {
             return yargs
                 .positional('file', {
                     describe: 'Test file or directory',
                     default: './test'
                 })
         })
-        .command('run <command>', 'Run a single command test', (yargs) => {
+        .command('run <command>', 'Run a single command test', (yargs: any) => {
             return yargs
                 .positional('command', {
                     describe: 'Command to test',
                     type: 'string'
                 })
         })
-        .command('silent <command>', 'Run a silent (non-interactive) test', (yargs) => {
+        .command('silent <command>', 'Run a silent (non-interactive) test', (yargs: any) => {
             return yargs
                 .positional('command', {
                     describe: 'Command to test',
                     type: 'string'
                 })
         })
-        .command('replay <action> [file]', 'Replay operations', (yargs) => {
+        .command('replay <action> [file]', 'Replay operations', (yargs: any) => {
             return yargs
                 .positional('action', {
                     describe: 'Action: play, export',
