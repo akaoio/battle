@@ -109,7 +109,7 @@ jobs:
             "
           else
             echo "Level 3: Battle tests Battle testing Battle (maximum confidence)"
-            node test/battle-self-test.js || true
+            node test/battle-self-test.cjs || true
           fi
 
   # Cross-platform testing
