@@ -41,8 +41,8 @@
     "test:quick": "tsx test/self.test.ts",
     "test:legacy": "tsx test/battle.test.ts",
     "test:cli": "node dist/cli.js test",
-    "docs:build": "npx @akaoio/composer build",
-    "docs:watch": "npx @akaoio/composer watch",
+    "docs:build": "npx @akaoio/composer build composer.config.cjs",
+    "docs:watch": "npx @akaoio/composer watch composer.config.cjs",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "prepublishOnly": "npm run build"

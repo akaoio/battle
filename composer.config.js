@@ -12,22 +12,12 @@ module.exports = {
   outputs: [
     {
       target: 'README.md',
-      template: 'templates/readme.md',
+      template: 'src/doc/templates/readme.md',
       data: 'docs'
     },
     {
       target: 'CLAUDE.md',
-      template: 'templates/claude.md',
-      data: 'docs'
-    },
-    {
-      target: 'API.md',
-      template: 'templates/api.md',
-      data: 'docs'
-    },
-    {
-      target: 'PTY-ARCHITECTURE.md',
-      template: 'templates/pty-architecture.md',
+      template: 'src/doc/templates/claude.md',
       data: 'docs'
     }
   ],
