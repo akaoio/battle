@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 **@akaoio/battle** - Universal terminal application testing framework with real PTY emulation
 
-**Version**: 1.2.0  
+**Version**: 1.2.1  
 **License**: MIT  
 **Author**: AKAO Team  
 **Repository**: https://github.com/akaoio/battle  
@@ -323,4 +323,4 @@ When working with security code:
 **Battle Philosophy**: "If it works in a pipe but fails in a PTY, it's not ready for production."
 
 *Built with real PTY emulation for real-world accuracy*
-*Version: 1.2.0 | License: MIT | Author: AKAO Team*
+*Version: 1.2.1 | License: MIT | Author: AKAO Team*
