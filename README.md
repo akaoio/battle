@@ -2,6 +2,7 @@
 
 > Real PTY testing with StarCraft-style replay capabilities
 
+[![CI/CD](https://github.com/akaoio/battle/actions/workflows/ci.yml/badge.svg)](https://github.com/akaoio/battle/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/npm/v/@akaoio/battle.svg)](https://www.npmjs.com/package/@akaoio/battle)
 [![License](https://img.shields.io/npm/l/@akaoio/battle.svg)](https://github.com/akaoio/battle/blob/main/LICENSE)
 [![Tests](https://img.shields.io/badge/tests-self--validating-green.svg)](https://github.com/akaoio/battle/actions)
