@@ -25,27 +25,37 @@ export class Ruspty implements IPTY {
             throw new Error('PTY instance limit exceeded - too many active PTYs')
         }
         
-        // Lazy load ruspty - different approach for Bun vs Node
+        // Lazy load ruspty - intelligent platform selection
         if (!Pty) {
             try {
-                if (this.isBun) {
-                    // Bun: Use raw Pty from index.js (wrapper's ReadStream doesn't work)
-                    // @ts-ignore - Dynamic require
-                    const ruspty = require('@akaoio/ruspty/index.js')
+                // Try @akaoio/ruspty first (has ARM64 support)
+                let ruspty
+                try {
+                    ruspty = this.isBun ? require('@akaoio/ruspty/index.js') : require('@akaoio/ruspty')
                     Pty = ruspty.Pty
-                } else {
-                    // Node: Use wrapped version
-                    // @ts-ignore - Dynamic require
-                    const ruspty = require('@akaoio/ruspty')
-                    Pty = ruspty.Pty
+                } catch (akaoError) {
+                    // Fallback to @replit/ruspty for x64 platforms
+                    try {
+                        ruspty = this.isBun ? require('@replit/ruspty/index.js') : require('@replit/ruspty')
+                        Pty = ruspty.Pty
+                    } catch (replitError) {
+                        // Both failed - throw comprehensive error
+                        throw new Error(
+                            'No compatible ruspty package found.\n' +
+                            'Install one of:\n' +
+                            '- npm install @akaoio/ruspty (ARM64 support)\n' +
+                            '- npm install @replit/ruspty (x64 support)\n' +
+                            `@akaoio error: ${akaoError.message}\n` +
+                            `@replit error: ${replitError.message}`
+                        )
+                    }
                 }
             } catch (err: any) {
                 ResourceLimiter.releasePTY()
                 const sanitizedError = SecureErrorHandler.sanitize(err)
                 throw new Error(
-                    '@akaoio/ruspty is not installed or failed to load.\n' +
-                    'Run: npm install @akaoio/ruspty\n' +
-                    'Note: ARM64 support is included\n' +
+                    'Ruspty is not installed or failed to load.\n' +
+                    'Run: npm install @akaoio/ruspty (or @replit/ruspty for x64)\n' +
                     `Error: ${sanitizedError}`
                 )
             }

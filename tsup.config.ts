@@ -5,6 +5,6 @@ export default defineConfig({
     format: ['cjs', 'esm'],
     dts: true,
     clean: true,
-    external: ['node-pty', '@akaoio/ruspty'],  // Mark native modules as external
-    noExternal: [/^(?!(node-pty|@akaoio\/ruspty))/]  // Bundle everything else
+    external: ['node-pty', '@akaoio/ruspty', '@replit/ruspty'],  // Mark native modules as external
+    noExternal: [/^(?!(node-pty|@akaoio\/ruspty|@replit\/ruspty))/]  // Bundle everything else
 })

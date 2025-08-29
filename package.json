@@ -60,13 +60,18 @@
   "author": "AKAO.IO",
   "license": "MIT",
   "dependencies": {
-    "@akaoio/ruspty": "^3.5.5",
     "chalk": "^4.1.2",
     "terminal-kit": "^3.0.0",
     "yargs": "^17.7.2"
   },
   "optionalDependencies": {
-    "node-pty": "^1.0.0"
+    "node-pty": "^1.0.0",
+    "@akaoio/ruspty": "^3.6.1",
+    "@replit/ruspty": "^3.5.2",
+    "@replit/ruspty-linux-x64-gnu": "^3.5.2",
+    "@replit/ruspty-darwin-x64": "^3.5.2", 
+    "@replit/ruspty-darwin-arm64": "^3.5.2",
+    "@akaoio/ruspty-linux-arm64-gnu": "^3.6.1"
   },
   "devDependencies": {
     "@akaoio/builder": "*",
