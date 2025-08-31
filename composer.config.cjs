@@ -3,7 +3,7 @@
  * Universal terminal testing framework with real PTY support
  */
 
-export default {
+module.exports = {
   sources: {
     // Project metadata
     project: {
