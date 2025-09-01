@@ -411,7 +411,6 @@ jobs:
       - name: Summary
         run: |
           echo "🎯 Battle CI/CD Pipeline Summary"
-          echo "================================"
           echo "✅ Quality checks completed"
           echo "✅ Multi-version builds completed"
           echo "✅ Self-testing (3 levels) completed"

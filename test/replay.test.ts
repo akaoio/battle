@@ -643,9 +643,7 @@ async function testReplayTimestamps() {
 
 // Main test runner
 async function runAllTests() {
-    console.log(chalk.bold('\n========================================'))
-    console.log(chalk.bold('   Battle Replay System Test Suite'))
-    console.log(chalk.bold('========================================'))
+    console.log(chalk.bold('\nBattle Replay System Test Suite'))
     
     // Run all replay tests
     await testReplayRecording()
@@ -660,13 +658,11 @@ async function runAllTests() {
     await testReplayTimestamps()
     
     // Final summary
-    console.log(chalk.bold('\n========================================'))
-    console.log(chalk.bold('   Replay Test Summary'))
-    console.log(chalk.bold('========================================'))
+    console.log(chalk.bold('\nReplay Test Summary'))
     console.log(`Total Tests: ${totalTests}`)
     console.log(`${chalk.green('Passed')}: ${passedTests}`)
     console.log(`${chalk.red('Failed')}: ${failedTests}`)
-    console.log(chalk.bold('========================================'))
+    console.log('')
     
     if (failedTests === 0) {
         console.log(chalk.green('\n✅ All replay tests passed!'))

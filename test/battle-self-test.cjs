@@ -10,8 +10,7 @@ const { Battle } = require('../dist/index.cjs');
 const { spawn } = require('child_process');
 
 async function level3SelfTest() {
-  console.log('🔄 Battle Self-Test Level 3: Battle tests Battle testing Battle');
-  console.log('===========================================================\n');
+  console.log('🔄 Battle Self-Test Level 3: Battle tests Battle testing Battle\n');
 
   // Create the outer Battle instance (Level 3)
   const outerBattle = new Battle({

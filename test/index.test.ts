@@ -12,10 +12,8 @@ import { runEdgeCaseTests } from './EdgeCase/index.test.js'
 import { runIntegrationTests } from './Integration/index.test.js'
 
 async function runAllTests() {
-    console.log('========================================')
-    console.log('   BATTLE FRAMEWORK TEST SUITE')
-    console.log('   Class = Directory Pattern')
-    console.log('========================================')
+    console.log('BATTLE FRAMEWORK TEST SUITE')
+    console.log('Class = Directory Pattern')
     console.log()
     
     const results = {
@@ -67,13 +65,11 @@ async function runAllTests() {
     
     // Print final summary
     console.log()
-    console.log('========================================')
-    console.log('   FINAL TEST SUMMARY')
-    console.log('========================================')
+    console.log('FINAL TEST SUMMARY')
     console.log(`Total Tests: ${results.total}`)
     console.log(`✅ Passed: ${results.passed}`)
     console.log(`❌ Failed: ${results.failed}`)
-    console.log('════════════════════════════════════════')
+    console.log('')
     
     if (results.failed === 0) {
         console.log('\n🎉 All tests passed! Framework follows Class = Directory pattern.')

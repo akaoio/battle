@@ -6,8 +6,7 @@
 import { Battle } from '../dist/index.js'
 
 async function debugBattle() {
-    console.log('🔍 Debug Battle Test')
-    console.log('====================\n')
+    console.log('🔍 Debug Battle Test\n')
     
     try {
         const battle = new Battle({

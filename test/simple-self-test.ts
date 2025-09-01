@@ -7,8 +7,7 @@
 import { Battle } from '../src/index.js'
 
 async function test() {
-    console.log('Battle Self-Test')
-    console.log('================\n')
+    console.log('Battle Self-Test\n')
     
     // Test 1: Basic spawn and output capture
     console.log('Test 1: Basic command execution')
@@ -122,7 +121,7 @@ async function test() {
         console.log('  FAIL:', e.message)
     }
     
-    console.log('\n================')
+    console.log('')
     console.log('Self-test complete!')
     console.log('Battle has tested itself successfully.')
     console.log('The chicken has laid the egg.')

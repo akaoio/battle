@@ -116,7 +116,6 @@ async function testSilentClass() {
 // Run all tests
 async function runAllTests() {
     console.log('Battle Framework Self-Test')
-    console.log('==========================')
     
     // Run runner tests
     await runner.run()

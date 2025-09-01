@@ -461,10 +461,8 @@ async function testReplaySystem() {
 
 // Main test runner
 async function runAllTests() {
-    console.log('========================================')
-    console.log('   Battle Self-Test Suite')
-    console.log('   The Framework Testing Itself')
-    console.log('========================================')
+    console.log('Battle Self-Test Suite')
+    console.log('The Framework Testing Itself')
     
     // Run all test groups
     await testBattleCore()
@@ -480,13 +478,11 @@ async function runAllTests() {
     await testReplaySystem()
     
     // Final summary
-    console.log('\n========================================')
-    console.log('   Test Summary')
-    console.log('========================================')
+    console.log('\nTest Summary')
     console.log(`Total Tests: ${totalTests}`)
     console.log(`Passed: ${passedTests}`)
     console.log(`Failed: ${failedTests}`)
-    console.log('========================================')
+    console.log('')
     
     if (failedTests === 0) {
         console.log('\nAll tests passed! Battle has successfully tested itself.')

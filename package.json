@@ -1,6 +1,6 @@
 {
   "name": "@akaoio/battle",
-  "version": "1.2.3",
+  "version": "0.0.1",
   "description": "Universal terminal application testing framework with real PTY emulation and screenshots",
   "type": "module",
   "main": "dist/index.cjs",
@@ -74,8 +74,8 @@
     "@akaoio/ruspty-linux-arm64-gnu": "^3.6.1"
   },
   "devDependencies": {
-    "@akaoio/builder": "*",
-    "@akaoio/composer": "*",
+    "@akaoio/builder": "workspace:*",
+    "@akaoio/composer": "workspace:*",
     "@types/bun": "^1.2.21",
     "@types/node": "^20.19.11",
     "@types/terminal-kit": "^2.5.7",

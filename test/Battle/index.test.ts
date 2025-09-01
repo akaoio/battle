@@ -13,10 +13,8 @@ import { testMetaBattle } from './meta.test.js'
 import { printSummary, resetCounters } from '../utils/testHelpers.js'
 
 export async function runBattleTests() {
-    console.log('========================================')
-    console.log('   Battle Class Test Suite')
-    console.log('   Testing all Battle methods')
-    console.log('========================================')
+    console.log('Battle Class Test Suite')
+    console.log('Testing all Battle methods')
     
     resetCounters()
     
